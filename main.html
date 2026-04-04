@@ -33,16 +33,25 @@ timelines and % complete shows a journey and puts progress in perspective. makin
     <meta charset="UTF-8">
     <title>timeline</title>
     <script src="index.js" defer></script>
+    <link rel="stylesheet" href="styles.css">
 </head>
 <body>
 
 <h1>your events</h1>
 
-<ul id="event_list"> <!-- javascript enters here --> </ul>
+<div id="event_holder">
+    <div>
+        <h1>main event</h1>
+        <p>mini description</p>
+    </div>
+</div>
 
 <form id="add_event">
     <label for="event_name">new event: </label>
     <input type="text" id="event_name" name="event_name">
+
+    <label for="event_description">basic tasks: </label>
+    <input type="text" id="event_description" name="event_description">
 
     <input type="submit">
 </form>
