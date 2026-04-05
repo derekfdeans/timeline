@@ -12,76 +12,70 @@ function setup() {
     loadEventList();
 }
 
-const html_form = document.getElementById("add_event");
-html_form.addEventListener("submit", function (event) {
-    event.preventDefault()
+function loadEventList() {
+    let allTasks = Object.keys(localStorage);
+    allTasks.forEach(key => {
+        addToTaskList(key);
+    })
+}
 
-    const formData = new FormData(html_form);
+const addEventForm = document.getElementById("eventAdder");
+addEventForm.addEventListener("submit", function (task) {
+    task.preventDefault()
 
-    let currentEvent = {
-        name: formData.get('event_name'),
-        description: formData.get('event_description'),
+    const formData = new FormData(addEventForm);
+
+    let currentTask = {
+        name: formData.get('eventName'),
+        description: formData.get('taskDescription'),
         completed: false,
     }
 
-    localStorage.setItem(`${currentEvent.name}`, JSON.stringify(currentEvent));
-    console.log(`added new event: ${currentEvent.name}`)
+    let key = String(Date.now());
 
-    loadEventList();
+    localStorage.setItem(key, JSON.stringify(currentTask));
+    addToTaskList(key);
 
-    html_form.reset();
+    addEventForm.reset();
 })
 
-const html_event_list = document.getElementById("event_holder");
+function addToTaskList(key) {
+    let event = JSON.parse(localStorage[key]);
+    let divPiece = event.completed ? `<div class="completed">` : `<div>`;
 
-function loadEventList() {
-    let newHTML = "";
-    Object.keys(localStorage).forEach(key => {
-        let event = JSON.parse(localStorage[key]);
+    const container = document.getElementById("container");
 
-        let divPiece = event.completed ? `<div class="completed">` : `<div>`;
-
-        newHTML += `${divPiece}` +
-            `<h1>${event.name}</h1>
+    container.innerHTML += `${divPiece}` +
+        `<h1>${event.name}</h1>
             <p>${event.description}</p>
-            <button id="${event.name}" class="remove_event">remove event</button>
-            <button id="${event.name}-complete" class="complete_event">complete event</button>
+            <button id="${key}-remove" class="removeTask">remove event</button>
+            <button id="${key}-complete" class="completeTask">complete event</button>
         </div>`;
+
+    wireCompleteButton(key);
+    wireRemoveButton(key);
+}
+
+function wireCompleteButton(key) {
+    let button = document.getElementById(`${key}-complete`);
+    button.addEventListener("click", function () {
+        let eventObject = JSON.parse(localStorage.getItem(key));
+
+        eventObject.completed = true;
+        localStorage.setItem(key, JSON.stringify(eventObject));
+        button.disabled = true;
+
+        button.parentElement.classList.add("completed");
     })
-
-    html_event_list.innerHTML = newHTML;
-    wireUpRemoveButtons();
-    wireUpCompleteButtons();
 }
 
-function wireUpCompleteButtons() {
-    let completeEventButtons = document.getElementsByClassName("complete_event");
+function wireRemoveButton(key) {
+    let button = document.getElementById(`${key}-remove`);
+    button.addEventListener("click", function () {
+        localStorage.removeItem(key);
 
-    for (let button of completeEventButtons) {
-        button.addEventListener("click", function () {
-            let objectKey = button.id.slice(0, button.id.lastIndexOf("-complete"));
-            let eventObject = JSON.parse(localStorage.getItem(objectKey));
-
-            eventObject.completed = true;
-            localStorage.setItem(objectKey, JSON.stringify(eventObject));
-            button.disabled = true;
-
-            button.parentElement.classList.add("completed");
-        })
-    }
-}
-
-function wireUpRemoveButtons() {
-    let removeEventButtons = document.getElementsByClassName("remove_event");
-
-    for (let button of removeEventButtons) {
-        button.addEventListener("click", function () {
-            localStorage.removeItem(`${button.id}`);
-            console.log(`removed event: ${button.id}`);
-
-            button.parentElement.remove();
-        });
-    }
+        button.parentElement.remove();
+    })
 }
 
 setup()

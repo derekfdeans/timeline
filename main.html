@@ -37,21 +37,16 @@ timelines and % complete shows a journey and puts progress in perspective. makin
 </head>
 <body>
 
-<h1>your events</h1>
+<h1>your tasks</h1>
 
-<div id="event_holder">
-    <div>
-        <h1>main event</h1>
-        <p>mini description</p>
-    </div>
-</div>
+<div id="container"> <!-- js inserts --> </div>
 
-<form id="add_event">
-    <label for="event_name">new event: </label>
-    <input type="text" id="event_name" name="event_name">
+<form id="eventAdder">
+    <label for="eventName">new task: </label>
+    <input type="text" id="eventName" name="eventName">
 
-    <label for="event_description">basic tasks: </label>
-    <input type="text" id="event_description" name="event_description">
+    <label for="taskDescription">description: </label>
+    <input type="text" id="taskDescription" name="taskDescription">
 
     <input type="submit">
 </form>

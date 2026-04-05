@@ -1,7 +1,13 @@
 div {
-    border: 1px solid black;
+    border: 1px solid white;
 }
 
 .completed {
-    background-color: green;
+    background-color: darkblue;
+}
+
+/* this is dark mode */
+body {
+    background-color: black;
+    color: white;
 }
