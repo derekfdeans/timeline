@@ -1,18 +1,7 @@
 console.log('Happy developing ✨')
 
-/*
-
-new system: creating a list, using "after" children.
-
-how to execute:
-each object has an "after" member, holding id of next task
-
-to add new: after buttons on each task
-first task: attaches to "GLOBAL," parent node
-also use global home key for tasks without a "timeline" aspect; just general "to do"s
-
-for now: just display which task comes next
- */
+// this hasn't been implemented i just wrote this one line
+let originTasks = [];
 
 class taskObject {
     constructor({name, description = ""} = {}) {
@@ -30,7 +19,7 @@ function setup() {
     wireGlobalTaskForm();
 }
 
-// for global tasks - no nesting before or after
+// for "global tasks" - no nesting before or after
 function wireGlobalTaskForm() {
     const addEventForm = document.getElementById("eventAdder");
     addEventForm.addEventListener("submit", function (task) {
@@ -46,7 +35,7 @@ function wireGlobalTaskForm() {
 
         // add task to storage and display it
         localStorage.setItem(newTask.id, JSON.stringify(newTask));
-        addToTaskList(newTask.id);
+        loadEventList();
 
         // reset form data
         addEventForm.reset();
@@ -54,24 +43,24 @@ function wireGlobalTaskForm() {
 }
 
 function loadEventList() {
-    const eventHolder = document.getElementById("container");
-    eventHolder.innerHTML = "";
+    const taskHolder = document.getElementById("container");
+    taskHolder.innerHTML = "";
 
     const allTasks = Object.keys(localStorage);
     allTasks.forEach(key => {
-        addToTaskList(key);
+        addToTaskList(taskHolder.id, key);
     });
 }
 
-function addToTaskList(key) {
+function addToTaskList(locationID, key) {
     // grab container, current task to add
     const task = JSON.parse(localStorage[key]);
-    const container = document.getElementById("container");
+    const container = document.getElementById(locationID);
 
     // set up HTML content for task
-    const div = document.createElement("div");
+    const taskSection = document.createElement("div");
     const completedPiece = task.completed ? `<div class="completed">` : `<div>`;
-    div.innerHTML = `${completedPiece}` +
+    taskSection.innerHTML = `${completedPiece}` +
         `<h1>${task.name}, id: ${task.id}</h1>
             <p>${task.description}</p>
             <p>previous task: ${task.before}, next task: ${task.after}</p>
@@ -82,7 +71,7 @@ function addToTaskList(key) {
         </div>`;
 
     // visually add task to container
-    container.appendChild(div);
+    container.appendChild(taskSection);
 
     // wire up all buttons with js
     wireCompleteButton(key);
@@ -91,44 +80,6 @@ function addToTaskList(key) {
 
     // debug button
     wireDisplayButton(key);
-}
-
-// essentially traverse a nested list, using "after" as steps
-function displayDataStructureFromNode(key) {
-    console.log("displaying tree");
-
-    // generate container for list
-    let listHolder = document.getElementById("listHolder");
-
-    // grab the start object from key
-    let start = JSON.parse(localStorage.getItem(key));
-
-    // generate HTML from recursive function
-    listHolder.innerHTML = traverse(start);
-}
-
-// recursive function that steps through children, generating a list
-function traverse(node) {
-    // grab "child node" text from going to the lower node, if it exists
-    let childNode = "";
-    if (node.after !== 0) {
-        let subNode = JSON.parse(localStorage.getItem(node.after));
-        childNode = traverse(subNode);
-    }
-
-    // if no more children, then this returns; a piece of the list with the child nested inside
-    return `<ul>
-        <li>${node.name}</li>
-        ${childNode}
-    </ul>`;
-}
-
-// to generate a visual tree below all the tasks, step through one of the nodes (input is the "start", top). this is debug, not for user
-function wireDisplayButton(key) {
-    let button = document.getElementById(`${key}-display`);
-    button.addEventListener("click", function () {
-        displayDataStructureFromNode(key);
-    });
 }
 
 // create new task as a child (next step) of current task
@@ -211,6 +162,47 @@ function wireRemoveButton(key) {
         // visually remove task from list (if page won't refresh)
         button.parentElement.remove();
     })
+}
+
+
+
+// DEBUG TOOLS
+// essentially traverse a nested list, using "after" as steps
+function displayDataStructureFromNode(key) {
+    console.log("displaying tree");
+
+    // generate container for list
+    let listHolder = document.getElementById("listHolder");
+
+    // grab the start object from key
+    let start = JSON.parse(localStorage.getItem(key));
+
+    // generate HTML from recursive function
+    listHolder.innerHTML = traverse(start);
+}
+
+// recursive function that steps through children, generating a list
+function traverse(node) {
+    // grab "child node" text from going to the lower node, if it exists
+    let childNode = "";
+    if (node.after !== 0) {
+        let subNode = JSON.parse(localStorage.getItem(node.after));
+        childNode = traverse(subNode);
+    }
+
+    // if no more children, then this returns; a piece of the list with the child nested inside
+    return `<ul>
+        <li>${node.name}</li>
+        ${childNode}
+    </ul>`;
+}
+
+// to generate a visual tree below all the tasks, step through one of the nodes (input is the "start", top). this is debug, not for user
+function wireDisplayButton(key) {
+    let button = document.getElementById(`${key}-display`);
+    button.addEventListener("click", function () {
+        displayDataStructureFromNode(key);
+    });
 }
 
 setup()
