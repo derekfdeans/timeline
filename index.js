@@ -1,7 +1,6 @@
 console.log('Happy developing ✨')
 
-// this hasn't been implemented i just wrote this one line
-let originTasks = [];
+const CONTAINER_ID = 'listHolder'
 
 class taskObject {
     constructor({name, description = ""} = {}) {
@@ -15,8 +14,61 @@ class taskObject {
 }
 
 function setup() {
-    loadEventList();
+    if (localStorage.getItem('ORIGINS') === null) {
+        localStorage.setItem('ORIGINS', JSON.stringify([]));
+    }
+
+    let container = document.getElementById(CONTAINER_ID);
+
     wireGlobalTaskForm();
+    newDisplayFormat();
+
+    // wire up the buttons inside container
+    wireCompleteButton(container);
+    wireRemoveButton(container);
+    wireAddNextButton(container);
+}
+
+// step through parents, for each generate a "section" (div)
+// for lists, load them horizontally in order with flexbox
+function newDisplayFormat() {
+    let origins = JSON.parse(localStorage.getItem('ORIGINS'));
+    let container = document.getElementById(CONTAINER_ID);
+    container.textContent = "";
+
+    for (let parentID of origins) {
+        let taskSection = document.createElement('div');
+        let parentTask = JSON.parse(localStorage.getItem(parentID));
+
+        taskSection.innerHTML = traverseForDisplay(parentTask);
+
+        container.appendChild(taskSection);
+    }
+}
+
+// generates html for task section
+function traverseForDisplay(task) {
+    if (task !== null) {
+        // grab "child task" text from going to the lower task, if it exists
+        let taskAfter = "";
+        if (task.after !== 0) {
+            let subTask = JSON.parse(localStorage.getItem(task.after));
+            taskAfter = traverseForDisplay(subTask);
+        }
+
+        // if no more children, then this returns
+        let completedPiece = task.completed ? "completed" : "";
+        return `<div class="task ${completedPiece}">
+                <h1>${task.name}</h1>
+                <p>${task.description}</p>
+                <button data-id="${task.id}" data-action="remove">remove task</button>
+                <button data-id="${task.id}" data-action="complete">complete task</button>
+                <button data-id="${task.id}" data-action="add-next">add next</button>
+            </div>
+            ${taskAfter}`;
+    } else {
+        return "nothing to see here!";
+    }
 }
 
 // for "global tasks" - no nesting before or after
@@ -33,15 +85,122 @@ function wireGlobalTaskForm() {
             description: formData.get('taskDescription'),
         });
 
-        // add task to storage and display it
+        // add new task to the origin
+        let originsList = JSON.parse(localStorage.getItem('ORIGINS'));
+        originsList.push(newTask.id);
+
+        // add task and list to storage
+        localStorage.setItem('ORIGINS', JSON.stringify(originsList));
         localStorage.setItem(newTask.id, JSON.stringify(newTask));
-        loadEventList();
 
         // reset form data
         addEventForm.reset();
+        newDisplayFormat();
     });
 }
 
+// create new task as a child (next step) of current task
+function wireAddNextButton(container) {
+    container.addEventListener("click", function (event) {
+        // pull up source task and its next, if it has one
+        if (event.target.tagName === "BUTTON" && event.target.dataset.action === "add-next") {
+            console.log("adding next...");
+            let sourceTask = JSON.parse(localStorage.getItem(event.target.dataset.id));
+            let sourceTaskNext = sourceTask.after ? JSON.parse(localStorage.getItem(sourceTask.after)) : 0;
+
+            // collect new task data and build object
+            let title = prompt("new task name?");
+            let description = prompt("new task description?");
+            let newTask = new taskObject({name: title, description: description});
+
+            sourceTask.after = newTask.id; // source task's next task is current task
+            newTask.before = sourceTask.id; // current task's previous is previous task
+
+            // if there is an original next
+            if (sourceTaskNext !== 0) {
+                sourceTaskNext.before = newTask.id; // the previous task of the original source's next task is the new task's id
+                newTask.after = sourceTaskNext.id;
+            }
+
+            localStorage.setItem(newTask.id, JSON.stringify(newTask));
+            localStorage.setItem(sourceTask.id, JSON.stringify(sourceTask));
+
+            if (sourceTaskNext !== 0) {
+                localStorage.setItem(sourceTaskNext.id, JSON.stringify(sourceTaskNext));
+            }
+
+            newDisplayFormat();
+        }
+    })
+}
+
+function wireCompleteButton(container) {
+    container.addEventListener("click", function (event) {
+        if (event.target.tagName === "BUTTON" && event.target.dataset.action === "complete") {
+            console.log("completing task...");
+
+            // grab task object and mark completed value true, store again
+            const task = JSON.parse(localStorage.getItem(event.target.dataset.id));
+            task.completed = true;
+            localStorage.setItem(event.target.dataset.id, JSON.stringify(task));
+
+            newDisplayFormat();
+        }
+    })
+}
+
+function wireRemoveButton(container) {
+    container.addEventListener("click", function (event) {
+        if (event.target.tagName === "BUTTON" && event.target.dataset.action === "remove") {
+            console.log("removing task...");
+
+            // if this one is pointed to by another task, or points to another, clean it up first
+            let currentTask = JSON.parse(localStorage.getItem(event.target.dataset.id));
+            let taskBefore = currentTask.before ? JSON.parse(localStorage.getItem(currentTask.before)) : 0;
+            let taskAfter = currentTask.after ? JSON.parse(localStorage.getItem(currentTask.after)) : 0;
+            let originsList = JSON.parse(localStorage.getItem('ORIGINS'));
+
+            // if it's between two objects
+            if (taskBefore && taskAfter) {
+                taskBefore.after = taskAfter.id;
+                taskAfter.before = taskBefore.id;
+            }
+
+            // if it's at end of list
+            if (taskBefore && !taskAfter) {
+                taskBefore.after = 0;
+            }
+
+            // if it's at start of a list and there's a next
+            if (!taskBefore && taskAfter) {
+                taskAfter.before = 0;
+
+                // update origins list
+                originsList.push(taskAfter.id);
+            }
+
+            // remove task from storage and origins list
+            originsList = originsList.filter(id => id !== currentTask.id);
+            localStorage.removeItem(event.target.dataset.id);
+
+            if (taskBefore !== 0) {
+                localStorage.setItem(taskBefore.id, JSON.stringify(taskBefore));
+            }
+            if (taskAfter !== 0) {
+                localStorage.setItem(taskAfter.id, JSON.stringify(taskAfter));
+            }
+
+            localStorage.setItem('ORIGINS', JSON.stringify(originsList));
+
+            newDisplayFormat();
+        }
+    })
+}
+
+
+
+
+/*
 function loadEventList() {
     const taskHolder = document.getElementById("container");
     taskHolder.innerHTML = "";
@@ -52,6 +211,9 @@ function loadEventList() {
     });
 }
 
+ */
+
+/*
 function addToTaskList(locationID, key) {
     // grab container, current task to add
     const task = JSON.parse(localStorage[key]);
@@ -59,9 +221,10 @@ function addToTaskList(locationID, key) {
 
     // set up HTML content for task
     const taskSection = document.createElement("div");
-    const completedPiece = task.completed ? `<div class="completed">` : `<div>`;
-    taskSection.innerHTML = `${completedPiece}` +
-        `<h1>${task.name}, id: ${task.id}</h1>
+    const completedClass = task.completed ? "completed" : "";
+    taskSection.innerHTML =
+        `<div class="task ${completedClass}">
+            <h1>${task.name}, id: ${task.id}</h1>
             <p>${task.description}</p>
             <p>previous task: ${task.before}, next task: ${task.after}</p>
             <button id="${key}-remove">remove task</button>
@@ -73,99 +236,12 @@ function addToTaskList(locationID, key) {
     // visually add task to container
     container.appendChild(taskSection);
 
-    // wire up all buttons with js
-    wireCompleteButton(key);
-    wireRemoveButton(key);
-    wireAddNextButton(key);
-
     // debug button
     wireDisplayButton(key);
 }
+*/
 
-// create new task as a child (next step) of current task
-function wireAddNextButton(key) {
-    let button = document.getElementById(`${key}-after`);
-    button.addEventListener("click", function () {
-        // pull up source task and its next, if it has one
-        let sourceTask = JSON.parse(localStorage.getItem(key));
-        let sourceTaskNext = sourceTask.after ? JSON.parse(localStorage.getItem(sourceTask.after)) : 0;
-
-        // collect new task data and build object
-        let title = prompt("new task name?");
-        let description = prompt("new task description?");
-        let newTask = new taskObject({name: title, description: description});
-
-        sourceTask.after = newTask.id; // source task's next task is current task
-        newTask.before = sourceTask.id; // current task's previous is previous task
-
-        // if there is an original next
-        if (sourceTaskNext !== 0) {
-            sourceTaskNext.before = newTask.id; // the previous task of the original source's next task is the new task's id
-            newTask.after = sourceTaskNext.id;
-        }
-
-        localStorage.setItem(newTask.id, JSON.stringify(newTask));
-        localStorage.setItem(sourceTask.id, JSON.stringify(sourceTask));
-        if (sourceTaskNext !== 0) {
-            localStorage.setItem(sourceTaskNext.id, JSON.stringify(sourceTaskNext));
-        }
-    })
-}
-
-function wireCompleteButton(key) {
-    let button = document.getElementById(`${key}-complete`);
-    button.addEventListener("click", function () {
-        // grab task object and mark completed value true, store again
-        const task = JSON.parse(localStorage.getItem(key));
-        task.completed = true;
-        localStorage.setItem(key, JSON.stringify(task));
-
-        // visually update the task (if page isn't going to be refreshed)
-        button.parentElement.classList.add("completed");
-    })
-}
-
-function wireRemoveButton(key) {
-    let button = document.getElementById(`${key}-remove`);
-    button.addEventListener("click", function () {
-        // if this one is pointed to by another task, or points to another, clean it up first
-        let currentTask = JSON.parse(localStorage.getItem(key));
-        let beforeObject = currentTask.before ? JSON.parse(localStorage.getItem(currentTask.before)) : 0;
-        let afterObject = currentTask.after ? JSON.parse(localStorage.getItem(currentTask.after)) : 0;
-
-        // if it's between two objects
-        if (beforeObject && afterObject) {
-            beforeObject.after = afterObject.id;
-            afterObject.before = beforeObject.id;
-        }
-
-        // if it's at end of list
-        if (beforeObject && !afterObject) {
-            beforeObject.after = 0;
-        }
-
-        // if it's at start of list
-        if (!beforeObject && afterObject) {
-            afterObject.before = 0;
-        }
-
-        // remove task from storage
-        localStorage.removeItem(key);
-
-        if (beforeObject !== 0) {
-            localStorage.setItem(beforeObject.id, JSON.stringify(beforeObject));
-        }
-        if (afterObject !== 0) {
-            localStorage.setItem(afterObject.id, JSON.stringify(afterObject));
-        }
-
-        // visually remove task from list (if page won't refresh)
-        button.parentElement.remove();
-    })
-}
-
-
-
+/*
 // DEBUG TOOLS
 // essentially traverse a nested list, using "after" as steps
 function displayDataStructureFromNode(key) {
@@ -204,5 +280,10 @@ function wireDisplayButton(key) {
         displayDataStructureFromNode(key);
     });
 }
+
+ */
+
+
+
 
 setup()
