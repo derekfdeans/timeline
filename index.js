@@ -1,6 +1,63 @@
 console.log('Happy developing ✨')
 
-const CONTAINER_ID = 'listHolder'
+function generateHeaderPiece(container) {
+    let headerPiece = document.createElement("div");
+    headerPiece.id = "headerPiece";
+
+    let headerText = document.createElement("h1");
+    headerText.textContent = "your tasks";
+    headerPiece.appendChild(headerText);
+
+    container.appendChild(headerPiece);
+}
+
+function generateMiddleHTML(container) {
+    let middlePiece = document.createElement("div");
+    middlePiece.id = "listHolder";
+
+    container.appendChild(middlePiece);
+}
+
+function generateFormPiece(container) {
+    let formContainer = document.createElement("div");
+    formContainer.id = "formContainer";
+
+    let form = document.createElement("form");
+    form.id = "eventAdder";
+
+    let nameLabel = document.createElement("label");
+    nameLabel.textContent = "new task: ";
+    nameLabel.setAttribute("for", "eventName");
+
+    let nameInput = document.createElement("input");
+    nameInput.type = "text";
+    nameInput.id = "eventName";
+    nameInput.name = "eventName";
+
+    form.append(nameLabel, nameInput);
+
+    let descriptionLabel = document.createElement("label");
+    descriptionLabel.textContent = "description: ";
+    nameLabel.setAttribute("for", "taskDescription");
+
+    let descriptionInput = document.createElement("input");
+    descriptionInput.type = "text";
+    descriptionInput.id = "taskDescription";
+    descriptionInput.name = "taskDescription";
+
+    form.append(descriptionLabel, descriptionInput);
+
+    let submitButton = document.createElement("input");
+    submitButton.type = "submit";
+    submitButton.textContent = "add task";
+
+    form.append(submitButton);
+
+    formContainer.append(form);
+
+    container.append(formContainer);
+}
+
 
 class taskObject {
     constructor({name, description = ""} = {}) {
@@ -13,66 +70,121 @@ class taskObject {
     }
 }
 
-function setup() {
+function initializeORIGINSArray() {
     if (localStorage.getItem('ORIGINS') === null) {
         localStorage.setItem('ORIGINS', JSON.stringify([]));
     }
+}
 
-    let container = document.getElementById(CONTAINER_ID);
+function setupPageHTML(root) {
+    generateHeaderPiece(root);
+    generateMiddleHTML(root);
+    generateFormPiece(root);
+}
 
-    wireGlobalTaskForm();
-    newDisplayFormat();
-
-    // wire up the buttons inside container
+function wireUpButtons(container) {
     wireCompleteButton(container);
     wireRemoveButton(container);
     wireAddNextButton(container);
+    wireGlobalTaskForm(container);
+}
+
+function setup() {
+    initializeORIGINSArray();
+
+    const root = document.querySelector("body");
+    setupPageHTML(root);
+
+    const container = document.getElementById('listHolder');
+
+    wireUpButtons(container);
+
+    newDisplayFormat(container);
 }
 
 // step through parents, for each generate a "section" (div)
 // for lists, load them horizontally in order with flexbox
-function newDisplayFormat() {
+function newDisplayFormat(container) {
     let origins = JSON.parse(localStorage.getItem('ORIGINS'));
-    let container = document.getElementById(CONTAINER_ID);
     container.textContent = "";
 
     for (let parentID of origins) {
         let taskSection = document.createElement('div');
         let parentTask = JSON.parse(localStorage.getItem(parentID));
 
-        taskSection.innerHTML = traverseForDisplay(parentTask);
+        let taskList = traverseForDisplay(parentTask);
+        for (let task of taskList) {
+            console.log(`current addition:`);
+            console.log(task);
+            taskSection.appendChild(task);
+        }
 
         container.appendChild(taskSection);
     }
 }
 
-// generates html for task section
+function generateTaskHTML(task) {
+    let taskContainer = document.createElement("div");
+    taskContainer.classList.add("task");
+
+    if (task.completed) {
+        taskContainer.classList.add("completed");
+    }
+
+    let taskHeader = document.createElement("h1");
+    taskHeader.textContent = task.name;
+    taskContainer.appendChild(taskHeader);
+
+    let taskDescription = document.createElement("p");
+    taskDescription.textContent = task.description;
+    taskContainer.appendChild(taskDescription);
+
+    let removeTaskButton = document.createElement("button");
+    removeTaskButton.dataset.id = task.id
+    removeTaskButton.dataset.action = "remove";
+    removeTaskButton.textContent = "remove task";
+    taskContainer.appendChild(removeTaskButton);
+
+    let completeTaskButton = document.createElement("button");
+    completeTaskButton.dataset.id = task.id
+    completeTaskButton.dataset.action = "complete";
+    completeTaskButton.textContent = "complete task";
+    taskContainer.appendChild(completeTaskButton);
+
+    let addNextTaskButton = document.createElement("button");
+    addNextTaskButton.dataset.id = task.id
+    addNextTaskButton.dataset.action = "addNext";
+    addNextTaskButton.textContent = "add next task";
+    taskContainer.appendChild(addNextTaskButton);
+
+    return taskContainer;
+}
+
+// goal: return a list of taskContainers, essentially a big collection of divs each for a task
 function traverseForDisplay(task) {
-    if (task !== null) {
-        // grab "child task" text from going to the lower task, if it exists
-        let taskAfter = "";
-        if (task.after !== 0) {
-            let subTask = JSON.parse(localStorage.getItem(task.after));
-            taskAfter = traverseForDisplay(subTask);
+    if (task !== null) { // if there's a first task
+        let listOfTasks = new Array(generateTaskHTML(task)); // create new list with node
+
+        // now: basically look over the task's "after" value to see if there's an after, and add it to the list
+        let current = task;
+        while (current.after !== 0) {
+            let nextTask = JSON.parse(localStorage.getItem(current.after));
+            listOfTasks.push(generateTaskHTML(nextTask));
+            current = nextTask;
         }
 
-        // if no more children, then this returns
-        let completedPiece = task.completed ? "completed" : "";
-        return `<div class="task ${completedPiece}">
-                <h1>${task.name}</h1>
-                <p>${task.description}</p>
-                <button data-id="${task.id}" data-action="remove">remove task</button>
-                <button data-id="${task.id}" data-action="complete">complete task</button>
-                <button data-id="${task.id}" data-action="add-next">add next</button>
-            </div>
-            ${taskAfter}`;
+        return listOfTasks;
+
     } else {
-        return "nothing to see here!";
+        let placeholder = document.createElement("p");
+        placeholder.textContent = "nothing to see here!";
+
+        return placeholder;
     }
 }
 
 // for "global tasks" - no nesting before or after
-function wireGlobalTaskForm() {
+function wireGlobalTaskForm(container) {
     const addEventForm = document.getElementById("eventAdder");
     addEventForm.addEventListener("submit", function (task) {
         // prevent reload, grab data from form
@@ -95,7 +207,7 @@ function wireGlobalTaskForm() {
 
         // reset form data
         addEventForm.reset();
-        newDisplayFormat();
+        newDisplayFormat(container);
     });
 }
 
@@ -129,7 +241,7 @@ function wireAddNextButton(container) {
                 localStorage.setItem(sourceTaskNext.id, JSON.stringify(sourceTaskNext));
             }
 
-            newDisplayFormat();
+            newDisplayFormat(container);
         }
     })
 }
@@ -144,7 +256,7 @@ function wireCompleteButton(container) {
             task.completed = true;
             localStorage.setItem(event.target.dataset.id, JSON.stringify(task));
 
-            newDisplayFormat();
+            newDisplayFormat(container);
         }
     })
 }
@@ -192,7 +304,7 @@ function wireRemoveButton(container) {
 
             localStorage.setItem('ORIGINS', JSON.stringify(originsList));
 
-            newDisplayFormat();
+            newDisplayFormat(container);
         }
     })
 }
