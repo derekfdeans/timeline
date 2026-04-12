@@ -99,17 +99,20 @@ function setup() {
 
     wireUpButtons(container);
 
-    newDisplayFormat(container);
+    displayTaskLists(container);
 }
 
 // step through parents, for each generate a "section" (div)
 // for lists, load them horizontally in order with flexbox
-function newDisplayFormat(container) {
+function displayTaskLists(container) {
     let origins = JSON.parse(localStorage.getItem('ORIGINS'));
     container.textContent = "";
+    container.classList.add("taskContainer");
 
     for (let parentID of origins) {
         let taskSection = document.createElement('div');
+        taskSection.classList.add('taskSection');
+
         let parentTask = JSON.parse(localStorage.getItem(parentID));
 
         let taskList = traverseForDisplay(parentTask);
@@ -123,53 +126,105 @@ function newDisplayFormat(container) {
     }
 }
 
-function generateTaskHTML(task) {
+function generateTaskHTML(task, counter, listLength) {
     let taskContainer = document.createElement("div");
     taskContainer.classList.add("task");
+    if (task.completed) taskContainer.classList.add("completed");
+    if (task.after !== 0) taskContainer.classList.add("hasNext");
 
-    if (task.completed) {
-        taskContainer.classList.add("completed");
-    }
+    let headerSection = document.createElement("div");
+    headerSection.classList.add("taskHeader");
 
     let taskHeader = document.createElement("h1");
     taskHeader.textContent = task.name;
-    taskContainer.appendChild(taskHeader);
+    headerSection.appendChild(taskHeader);
+
+    let taskCounter = document.createElement("p");
+    taskCounter.textContent = `${counter} / ${listLength}`;
+    headerSection.appendChild(taskCounter);
+
+    taskContainer.appendChild(headerSection);
+
+
+
+    let taskBody = document.createElement("div");
+    taskBody.classList.add("taskBody");
+
+    let dateTime = document.createElement("p");
+    let dateOfTask = new Date(+task.id);
+    let timeDifferenceInSeconds = Math.floor((Date.now() - dateOfTask) / 1000 / 60);
+    dateTime.textContent = `created ${timeDifferenceInSeconds} minutes ago`
+    dateTime.classList.add("subHeading");
+    taskBody.appendChild(dateTime);
 
     let taskDescription = document.createElement("p");
     taskDescription.textContent = task.description;
-    taskContainer.appendChild(taskDescription);
+    taskBody.appendChild(taskDescription);
+
+    taskContainer.appendChild(taskBody);
+
+
+
+    let buttonSection = document.createElement("div");
+    buttonSection.classList.add("buttonSection");
 
     let removeTaskButton = document.createElement("button");
     removeTaskButton.dataset.id = task.id
     removeTaskButton.dataset.action = "remove";
-    removeTaskButton.textContent = "remove task";
-    taskContainer.appendChild(removeTaskButton);
+    removeTaskButton.textContent = "remove";
+    buttonSection.appendChild(removeTaskButton);
 
     let completeTaskButton = document.createElement("button");
     completeTaskButton.dataset.id = task.id
     completeTaskButton.dataset.action = "complete";
-    completeTaskButton.textContent = "complete task";
-    taskContainer.appendChild(completeTaskButton);
+    completeTaskButton.textContent = "complete";
+    buttonSection.appendChild(completeTaskButton);
 
     let addNextTaskButton = document.createElement("button");
     addNextTaskButton.dataset.id = task.id
     addNextTaskButton.dataset.action = "addNext";
-    addNextTaskButton.textContent = "add next task";
-    taskContainer.appendChild(addNextTaskButton);
+    addNextTaskButton.textContent = "add next";
+    buttonSection.appendChild(addNextTaskButton);
+
+    taskContainer.append(buttonSection);
+
+
 
     return taskContainer;
+}
+
+function findListLength(root) {
+    let counter = 0;
+
+    if (root !== null) {
+        let current = root;
+        counter += 1;
+
+        if (root.after !== 0) {
+            while (current.after !== 0) {
+                let nextTask = JSON.parse(localStorage.getItem(current.after));
+                counter += 1;
+                current = nextTask;
+            }
+        }
+    }
+
+    return counter;
 }
 
 // goal: return a list of taskContainers, essentially a big collection of divs each for a task
 function traverseForDisplay(task) {
     if (task !== null) { // if there's a first task
-        let listOfTasks = new Array(generateTaskHTML(task)); // create new list with node
+        let counter = 1;
+        let maxValue = findListLength(task);
+        let listOfTasks = new Array(generateTaskHTML(task, counter, maxValue)); // create new list with node
 
         // now: basically look over the task's "after" value to see if there's an after, and add it to the list
         let current = task;
         while (current.after !== 0) {
             let nextTask = JSON.parse(localStorage.getItem(current.after));
-            listOfTasks.push(generateTaskHTML(nextTask));
+            counter += 1;
+            listOfTasks.push(generateTaskHTML(nextTask, counter, maxValue));
             current = nextTask;
         }
 
@@ -207,7 +262,7 @@ function wireGlobalTaskForm(container) {
 
         // reset form data
         addEventForm.reset();
-        newDisplayFormat(container);
+        displayTaskLists(container);
     });
 }
 
@@ -215,7 +270,7 @@ function wireGlobalTaskForm(container) {
 function wireAddNextButton(container) {
     container.addEventListener("click", function (event) {
         // pull up source task and its next, if it has one
-        if (event.target.tagName === "BUTTON" && event.target.dataset.action === "add-next") {
+        if (event.target.tagName === "BUTTON" && event.target.dataset.action === "addNext") {
             console.log("adding next...");
             let sourceTask = JSON.parse(localStorage.getItem(event.target.dataset.id));
             let sourceTaskNext = sourceTask.after ? JSON.parse(localStorage.getItem(sourceTask.after)) : 0;
@@ -241,7 +296,7 @@ function wireAddNextButton(container) {
                 localStorage.setItem(sourceTaskNext.id, JSON.stringify(sourceTaskNext));
             }
 
-            newDisplayFormat(container);
+            displayTaskLists(container);
         }
     })
 }
@@ -256,7 +311,7 @@ function wireCompleteButton(container) {
             task.completed = true;
             localStorage.setItem(event.target.dataset.id, JSON.stringify(task));
 
-            newDisplayFormat(container);
+            displayTaskLists(container);
         }
     })
 }
@@ -304,7 +359,7 @@ function wireRemoveButton(container) {
 
             localStorage.setItem('ORIGINS', JSON.stringify(originsList));
 
-            newDisplayFormat(container);
+            displayTaskLists(container);
         }
     })
 }
