@@ -8,22 +8,15 @@ generally notice:
     what feels missing/distracting?
 
 cosmetic changes: !
-    make tasks smaller - more dense appearance
-    give buttons a better look
     some colors? give headers different color
-add a dark/light mode -> header, button to click on top right !!!
-    subtask/setup: make top "your tasks" a nav bar, login and dark mode buttons
-move new task input up top !!
-    also make it more cosmetically beautiful
+make new category input more beautiful
 better "add next" system - can't cancel as-is, alerts are old !!!
     write a popup window?
 a new <div> on top of each task category? still tile style !!
-    add % complete; another traversal, count up completed against "total"
     add way to hide/show tasks
 add way to edit tasks !!!
     subpage system? click on task to open task editor? or inline add text boxes for input to the current task <div>
-    initial system: recognize a click on the task, alert inputs edits
-figure out more fancy timing system: seconds when less than a minute, minuets when less than an hour, hours when less than a day, etc etc
+figure out more fancy timing system: seconds when less than a minute, minutes when less than an hour, hours when less than a day, etc
 
 
 eventually add cross-device support -> login system !
@@ -102,7 +95,7 @@ function generateFormPiece(container) {
     form.id = "eventAdder";
 
     let nameLabel = document.createElement("label");
-    nameLabel.textContent = "new task: ";
+    nameLabel.textContent = "new category: ";
     nameLabel.setAttribute("for", "eventName");
 
     let nameInput = document.createElement("input");
@@ -416,13 +409,16 @@ function wireAddNextButton(container) {
     container.addEventListener("click", function (event) {
         // pull up source task and its next, if it has one
         if (event.target.tagName === "BUTTON" && event.target.dataset.action === "addNext") {
-            let sourceTask = JSON.parse(localStorage.getItem(event.target.dataset.id));
-            let sourceTaskNext = sourceTask.after ? JSON.parse(localStorage.getItem(sourceTask.after)) : 0;
-
             // collect new task data and build object
             let title = prompt("new task name?");
+            if (title === null) {
+                return;
+            }
             let description = prompt("new task description?");
             let newTask = new taskObject({name: title, description: description});
+
+            let sourceTask = JSON.parse(localStorage.getItem(event.target.dataset.id));
+            let sourceTaskNext = sourceTask.after ? JSON.parse(localStorage.getItem(sourceTask.after)) : 0;
 
             sourceTask.after = newTask.id; // source task's next task is current task
             newTask.before = sourceTask.id; // current task's previous is previous task
