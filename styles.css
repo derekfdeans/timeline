@@ -1,13 +1,21 @@
 :root {
-    --main-color: blue;
-    --main-color-accent: blue;
+    --main-color: black;
+    --main-color-accent: black;
     --main-color-hover: green;
 }
 
 body {
     font: 14px Arial, sans-serif;
+}
+
+.darkMode {
     background-color: #1e1e1e;
     color: #e8e8e8;
+}
+
+.lightMode {
+    background-color: #e8e8e8;
+    color: #1e1e1e;
 }
 
 div {
@@ -15,15 +23,32 @@ div {
 }
 
 .task {
-    border: 1px solid var(--main-color);
+    border: 2px solid var(--main-color);
     position: relative;
     border-radius: 5px;
+    line-height: 1;
+
+    box-shadow: 2px 2px 0 0 var(--main-color);
+    transition: box-shadow 0.2s ease-in-out;
+}
+
+.task * {
+    margin: 0;
+}
+
+.task:hover {
+    transition: box-shadow 0.2s ease-in-out;
+    box-shadow: 0 0 var(--main-color);
 }
 
 .taskSection {
     display: flex;
     flex-direction: column;
-    gap: 50px;
+    gap: 30px;
+    /*
+    border: 1px solid var(--main-color);
+    border-radius: 5px;
+    */
 }
 
 .taskContainer {
@@ -35,11 +60,11 @@ div {
 .hasNext::after {
     content: "";
     position: absolute;
-    bottom: -40px;
+    bottom: -28px;
     left: 50%;
     transform: translateX(-50%);
     width: 2px;
-    height: 30px;
+    height: 20px;
     background-color: var(--main-color-accent);
 }
 
@@ -50,15 +75,46 @@ div {
     gap: 10px;
 }
 
+button {
+    background-color: white;
+    border: 1px solid var(--main-color);
+    border-radius: 5px;
+    font-weight: bold;
+    white-space: nowrap;
+    cursor: pointer;
+
+
+    box-shadow: 1px 1px 0 0 var(--main-color);
+    transition: box-shadow 0.2s ease-in-out;
+}
+
+button:hover {
+    transition: box-shadow 0.2s ease-in-out;
+    box-shadow: 0 0 var(--main-color);
+}
+
+.headerPiece {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    background-color: dimgray;
+}
+
+h1 {
+    margin: 0;
+}
+
+.navPiece {
+    display: flex;
+    gap: 10px;
+}
+
 .taskHeader {
     display: flex;
     flex-direction: row;
     align-items: center;
     justify-content: space-between;
-}
-
-.taskHeader h1 {
-    margin: 0;
 }
 
 .subHeading {
@@ -67,4 +123,5 @@ div {
 
 .completed {
     text-decoration: line-through;
+    background-color: green;
 }
