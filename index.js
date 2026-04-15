@@ -9,10 +9,9 @@ generally notice:
 
 cosmetic changes: !
     some colors? give headers different color
-make new category input more beautiful
-better "add next" system - can't cancel as-is, alerts are old !!!
+better "add next" system - alerts are old !!!
     write a popup window?
-a new <div> on top of each task category? still tile style !!
+a new <div> on top of each task category? still tile style!
     add way to hide/show tasks
 add way to edit tasks !!!
     subpage system? click on task to open task editor? or inline add text boxes for input to the current task <div>
@@ -55,6 +54,7 @@ class taskObject {
 function generateHeaderPiece(container) {
     let headerPiece = document.createElement("div");
     headerPiece.classList.add("headerPiece");
+    headerPiece.classList.add("mainSection");
     headerPiece.id = 'headerPiece';
 
     let leftSideNav = document.createElement("div");
@@ -68,11 +68,13 @@ function generateHeaderPiece(container) {
     let darkModeButton = document.createElement("button");
     darkModeButton.textContent = "dark mode";
     darkModeButton.dataset.action = "dark";
+    darkModeButton.classList.add("button");
     navPiece.appendChild(darkModeButton);
 
     let logInButton = document.createElement("button");
     logInButton.textContent = "log in";
     logInButton.dataset.action = "logIn";
+    logInButton.classList.add("button");
     navPiece.appendChild(logInButton);
 
     headerPiece.appendChild(navPiece);
@@ -83,6 +85,7 @@ function generateHeaderPiece(container) {
 function generateMiddleHTML(container) {
     let middlePiece = document.createElement("div");
     middlePiece.id = "listHolder";
+    middlePiece.classList.add("mainSection");
 
     container.appendChild(middlePiece);
 }
@@ -90,12 +93,17 @@ function generateMiddleHTML(container) {
 function generateFormPiece(container) {
     let formContainer = document.createElement("div");
     formContainer.id = "formContainer";
+    formContainer.classList.add("formContainer");
+    formContainer.classList.add("mainSection");
 
     let form = document.createElement("form");
     form.id = "eventAdder";
 
+    let nameSection = document.createElement("div");
+    nameSection.classList.add("nameSection");
+
     let nameLabel = document.createElement("label");
-    nameLabel.textContent = "new category: ";
+    nameLabel.textContent = "new category task: ";
     nameLabel.setAttribute("for", "eventName");
 
     let nameInput = document.createElement("input");
@@ -103,9 +111,11 @@ function generateFormPiece(container) {
     nameInput.id = "eventName";
     nameInput.name = "eventName";
 
-    form.append(nameLabel, nameInput);
+    nameSection.append(nameLabel, nameInput);
+    form.appendChild(nameSection);
 
     /*
+    let descriptionSection = document.createElement("div");
     let descriptionLabel = document.createElement("label");
     descriptionLabel.textContent = "description: ";
     nameLabel.setAttribute("for", "taskDescription");
@@ -115,12 +125,14 @@ function generateFormPiece(container) {
     descriptionInput.id = "taskDescription";
     descriptionInput.name = "taskDescription";
 
-    form.append(descriptionLabel, descriptionInput);
-*/
+    descriptionSection.append(descriptionLabel, descriptionInput);
+    form.appendChild(descriptionSection); */
 
     let submitButton = document.createElement("input");
     submitButton.type = "submit";
     submitButton.textContent = "add task";
+    submitButton.classList.add("button");
+    submitButton.classList.add("submitButton");
 
     form.append(submitButton);
 
@@ -181,13 +193,12 @@ function setup() {
 
     // pull this out into function later
     if (localStorage.getItem('darkMode') === null) {
-        localStorage.setItem('darkMode', JSON.stringify(true));
+        localStorage.setItem('darkMode', JSON.stringify(false));
     }
     root.classList.add('darkMode');
 
     let headerContainer = document.getElementById('headerPiece');
     wireDarkModeButton(headerContainer);
-
 
     displayTaskLists(container);
 }
@@ -295,18 +306,21 @@ function generateTaskHTML(task, counter, listLength) {
     removeTaskButton.dataset.id = task.id
     removeTaskButton.dataset.action = "remove";
     removeTaskButton.textContent = "remove";
+    removeTaskButton.classList.add("button");
     buttonSection.appendChild(removeTaskButton);
 
     let completeTaskButton = document.createElement("button");
     completeTaskButton.dataset.id = task.id
     completeTaskButton.dataset.action = "complete";
     completeTaskButton.textContent = "complete";
+    completeTaskButton.classList.add("button");
     buttonSection.appendChild(completeTaskButton);
 
     let addNextTaskButton = document.createElement("button");
     addNextTaskButton.dataset.id = task.id
     addNextTaskButton.dataset.action = "addNext";
     addNextTaskButton.textContent = "add next";
+    addNextTaskButton.classList.add("button");
     buttonSection.appendChild(addNextTaskButton);
 
     taskContainer.append(buttonSection);
@@ -361,7 +375,6 @@ function traverseForDisplay(task) {
     }
 }
 
-// for "global tasks" - no nesting before or after
 function wireGlobalTaskForm(container) {
     const addEventForm = document.getElementById("eventAdder");
     addEventForm.addEventListener("submit", function (task) {
@@ -391,8 +404,13 @@ function wireGlobalTaskForm(container) {
 function wireEditTaskClickEvent(container) {
     container.addEventListener("click", function (event) {
         if (event.target.tagName === "DIV" && event.target.dataset.type === "task") {
+
             let taskId = event.target.dataset.id;
             let newDescription = prompt("new description?");
+
+            if (newDescription === null || newDescription === "") {
+                return;
+            }
 
             let currentTask = JSON.parse(localStorage.getItem(taskId));
             currentTask.description = newDescription;
@@ -404,16 +422,16 @@ function wireEditTaskClickEvent(container) {
     })
 }
 
-// create new task as a child (next step) of current task
 function wireAddNextButton(container) {
     container.addEventListener("click", function (event) {
         // pull up source task and its next, if it has one
         if (event.target.tagName === "BUTTON" && event.target.dataset.action === "addNext") {
             // collect new task data and build object
             let title = prompt("new task name?");
-            if (title === null) {
+            if (title === null || title === "") {
                 return;
             }
+
             let description = prompt("new task description?");
             let newTask = new taskObject({name: title, description: description});
 
@@ -520,22 +538,6 @@ function wireRemoveButton(container) {
         }
     })
 }
-
-
-
-
-/*
-function loadEventList() {
-    const taskHolder = document.getElementById("container");
-    taskHolder.innerHTML = "";
-
-    const allTasks = Object.keys(localStorage);
-    allTasks.forEach(key => {
-        addToTaskList(taskHolder.id, key);
-    });
-}
-
- */
 
 /*
 function addToTaskList(locationID, key) {

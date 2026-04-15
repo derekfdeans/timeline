@@ -1,7 +1,9 @@
 :root {
-    --main-color: black;
-    --main-color-accent: black;
-    --main-color-hover: green;
+    --main-color: #799FC3;
+    --main-color-accent: #A1C7EF;
+    --main-color-hover: #658BAD;
+    --dark-content: #1e1e1e;
+    --bright-content: #e8e8e8;
 }
 
 body {
@@ -9,17 +11,17 @@ body {
 }
 
 .darkMode {
-    background-color: #1e1e1e;
-    color: #e8e8e8;
+    background-color: var(--dark-content);
+    color: var(--bright-content);
 }
 
 .lightMode {
-    background-color: #e8e8e8;
-    color: #1e1e1e;
+    background-color: var(--bright-content);
+    color: var(--dark-content);
 }
 
-div {
-    padding: 5px;
+.mainSection {
+    margin: 20px 10px;
 }
 
 .task {
@@ -27,18 +29,32 @@ div {
     position: relative;
     border-radius: 5px;
     line-height: 1;
+    padding: 5px;
 
-    box-shadow: 2px 2px 0 0 var(--main-color);
-    transition: box-shadow 0.2s ease-in-out;
+    background-color: var(--main-color);
+    transition: all 0.2s ease-in-out;
+}
+
+.taskBody {
+    padding-top: 5px;
+    padding-bottom: 5px;
 }
 
 .task * {
     margin: 0;
 }
 
+.completed {
+    text-decoration: line-through;
+    background-color: var(--main-color-accent);
+    border: 2px solid var(--main-color-accent);
+}
+
 .task:hover {
-    transition: box-shadow 0.2s ease-in-out;
-    box-shadow: 0 0 var(--main-color);
+    transition: all 0.2s ease-in-out;
+
+    border: 2px solid var(--main-color-hover);
+    background-color: var(--main-color-hover);
 }
 
 .taskSection {
@@ -54,18 +70,19 @@ div {
 .taskContainer {
     display: flex;
     flex-direction: row;
-    gap: 5px;
+    gap: 10px;
+
 }
 
 .hasNext::after {
     content: "";
     position: absolute;
-    bottom: -28px;
+    bottom: -26px;
     left: 50%;
     transform: translateX(-50%);
     width: 2px;
     height: 20px;
-    background-color: var(--main-color-accent);
+    background-color: var(--main-color-hover);
 }
 
 .buttonSection {
@@ -75,7 +92,7 @@ div {
     gap: 10px;
 }
 
-button {
+.button {
     background-color: white;
     border: 1px solid var(--main-color);
     border-radius: 5px;
@@ -83,31 +100,13 @@ button {
     white-space: nowrap;
     cursor: pointer;
 
-
-    box-shadow: 1px 1px 0 0 var(--main-color);
-    transition: box-shadow 0.2s ease-in-out;
+    box-shadow: 1px 1px  var(--main-color);
+    transition: all 0.2s ease-in-out;
 }
 
-button:hover {
-    transition: box-shadow 0.2s ease-in-out;
-    box-shadow: 0 0 var(--main-color);
-}
-
-.headerPiece {
-    display: flex;
-    flex-direction: row;
-    align-items: center;
-    justify-content: space-between;
-    background-color: dimgray;
-}
-
-h1 {
-    margin: 0;
-}
-
-.navPiece {
-    display: flex;
-    gap: 10px;
+.button:hover {
+    transition: all 0.2s ease-in-out;
+    box-shadow: 0 0 solid var(--main-color-hover);
 }
 
 .taskHeader {
@@ -121,7 +120,38 @@ h1 {
     font-style: italic;
 }
 
-.completed {
-    text-decoration: line-through;
-    background-color: green;
+
+.headerPiece {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+}
+
+h1 {
+    margin: 0;
+}
+
+.navPiece {
+    display: flex;
+    gap: 10px;
+}
+
+
+
+.formContainer {
+    border: 1px solid white;
+    padding: 5px;
+    width: max-content;
+    font-weight: bold;
+}
+
+.nameSection {
+    display: flex;
+    flex-direction: row;
+    gap: 10px;
+}
+
+.submitButton {
+    margin-top: 10px;
 }
