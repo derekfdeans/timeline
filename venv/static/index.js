@@ -50,7 +50,6 @@ class taskObject {
     }
 }
 
-
 function generateHeaderPiece(container) {
     let headerPiece = document.createElement("div");
     headerPiece.classList.add("headerPiece");
@@ -235,27 +234,38 @@ function calculateCompleted(rootNode) {
 // step through parents, for each generate a "section" (div)
 // for lists, load them horizontally in order with flexbox
 function displayTaskLists(container) {
-    let origins = JSON.parse(localStorage.getItem('ORIGINS'));
     container.textContent = "";
     container.classList.add("taskContainer");
 
-    for (let parentID of origins) {
-        let parentTask = JSON.parse(localStorage.getItem(parentID));
+    fetch('/get-tasks', {
+        method: 'GET'
+    })
+        .then(response => response.json())
+        .then(data => {
+            console.log(data)
 
-        let taskSection = document.createElement('div');
-        taskSection.classList.add('taskSection');
-        let listHeader = generateTopPiece(parentTask);
+            let origins = data.origins;
+            let tasks = data.tasks;
 
-        taskSection.appendChild(listHeader);
+            for (let parentID of origins) {
+                let parentTask = JSON.parse(localStorage.getItem(parentID));
+
+                let taskSection = document.createElement('div');
+                taskSection.classList.add('taskSection');
+                let listHeader = generateTopPiece(parentTask);
+
+                taskSection.appendChild(listHeader);
 
 
-        let taskList = traverseForDisplay(parentTask);
-        for (let task of taskList) {
-            taskSection.appendChild(task);
-        }
+                let taskList = traverseForDisplay(parentTask);
+                for (let task of taskList) {
+                    taskSection.appendChild(task);
+                }
 
-        container.appendChild(taskSection);
-    }
+                container.appendChild(taskSection);
+            }
+        })
+        .catch(error => console.log(error));
 }
 
 function generateTaskHTML(task, counter, listLength) {
@@ -394,6 +404,18 @@ function wireGlobalTaskForm(container) {
         // add task and list to storage
         localStorage.setItem('ORIGINS', JSON.stringify(originsList));
         localStorage.setItem(newTask.id, JSON.stringify(newTask));
+
+        // new - send data to server
+        fetch("add-task", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify(newTask)
+        })
+            .then(response => response.json())
+            .then(data => console.log(data))
+            .catch(error => console.log(error));
 
         // reset form data
         addEventForm.reset();
