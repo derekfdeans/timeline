@@ -25,20 +25,29 @@ eventually add cross-device support -> login system !
         starting with localhost to practice,
         railway for lightweight hosting (this is the multi-device piece)
         learn authentication - data security
-        figure out sql - true database! (this and auth is key for umich)
+        figure out SQL - true database! (this and auth is key for Michigan)
     when done with server, think about WEBSOCKETS ( live updates, fun )
 
 
 
-code-side edits: save for end (when features are allll added)
+code-side edits: save for end (when features are all added)
 REFACTOR.
     split into separate files
-    ensure ui, logic, and data split
     ensure readability
     find a "parent function" for traversing, pass in a function for each sub-capability (finding completed, finding length)
 
  */
 
+/*
+
+main goal for 04/15/2026
+
+ensure ui, logic, and data split
+
+ */
+
+
+// data object - move to python
 class taskObject {
     constructor({name, description = ""} = {}) {
         this.id = String(Date.now());
@@ -50,6 +59,7 @@ class taskObject {
     }
 }
 
+// all ui components! no logic inside
 function generateHeaderPiece(container) {
     let headerPiece = document.createElement("div");
     headerPiece.classList.add("headerPiece");
@@ -96,24 +106,24 @@ function generateFormPiece(container) {
     formContainer.classList.add("mainSection");
 
     let form = document.createElement("form");
-    form.id = "eventAdder";
+    form.id = "taskAdder";
 
     let nameSection = document.createElement("div");
     nameSection.classList.add("nameSection");
 
     let nameLabel = document.createElement("label");
     nameLabel.textContent = "new category task: ";
-    nameLabel.setAttribute("for", "eventName");
+    nameLabel.setAttribute("for", "taskName");
 
     let nameInput = document.createElement("input");
     nameInput.type = "text";
-    nameInput.id = "eventName";
-    nameInput.name = "eventName";
+    nameInput.id = "taskName";
+    nameInput.name = "taskName";
 
     nameSection.append(nameLabel, nameInput);
     form.appendChild(nameSection);
 
-    /*
+
     let descriptionSection = document.createElement("div");
     let descriptionLabel = document.createElement("label");
     descriptionLabel.textContent = "description: ";
@@ -125,7 +135,7 @@ function generateFormPiece(container) {
     descriptionInput.name = "taskDescription";
 
     descriptionSection.append(descriptionLabel, descriptionInput);
-    form.appendChild(descriptionSection); */
+    form.appendChild(descriptionSection);
 
     let submitButton = document.createElement("input");
     submitButton.type = "submit";
@@ -161,118 +171,19 @@ function generateTopPiece(parentTask) {
     return listHeader;
 }
 
-function initializeORIGINSArray() {
-    if (localStorage.getItem('ORIGINS') === null) {
-        localStorage.setItem('ORIGINS', JSON.stringify([]));
-    }
-}
-
 function setupPageHTML(root) {
     generateHeaderPiece(root);
     generateFormPiece(root);
     generateMiddleHTML(root);
 }
 
-function wireUpButtons(container) {
-    wireCompleteButton(container);
-    wireRemoveButton(container);
-    wireAddNextButton(container);
-    wireGlobalTaskForm(container);
-    wireEditTaskClickEvent(container);
-}
-
-function setup() {
-    initializeORIGINSArray();
-
-    const root = document.querySelector("body");
-    setupPageHTML(root);
-
-    const container = document.getElementById('listHolder');
-    wireUpButtons(container);
-
-    // pull this out into function later
-    if (localStorage.getItem('darkMode') === null) {
-        localStorage.setItem('darkMode', JSON.stringify(false));
-    }
-    root.classList.add('darkMode');
-
-    let headerContainer = document.getElementById('headerPiece');
-    wireDarkModeButton(headerContainer);
-
-    displayTaskLists(container);
-}
-
-function calculateCompleted(rootNode) {
-    let lengthCounter = 0;
-    let completedCounter = 0;
-
-    if (rootNode !== null) {
-        let current = rootNode;
-        lengthCounter += 1;
-        if (rootNode.completed === true) {
-            completedCounter += 1;
-        }
-
-        if (rootNode.after !== 0) {
-            while (current.after !== 0) {
-
-                let nextTask = JSON.parse(localStorage.getItem(current.after));
-                lengthCounter += 1;
-                if (nextTask.completed === true) {
-                    completedCounter += 1;
-                }
-
-                current = nextTask;
-            }
-        }
-    }
-
-    return Math.floor((completedCounter / lengthCounter) * 100);
-}
-
-
-// step through parents, for each generate a "section" (div)
-// for lists, load them horizontally in order with flexbox
-function displayTaskLists(container) {
-    container.textContent = "";
-    container.classList.add("taskContainer");
-
-    fetch('/get-tasks', {
-        method: 'GET'
-    })
-        .then(response => response.json())
-        .then(data => {
-            console.log(data)
-
-            let origins = data.origins;
-            let tasks = data.tasks;
-
-            for (let parentID of origins) {
-                let parentTask = JSON.parse(localStorage.getItem(parentID));
-
-                let taskSection = document.createElement('div');
-                taskSection.classList.add('taskSection');
-                let listHeader = generateTopPiece(parentTask);
-
-                taskSection.appendChild(listHeader);
-
-
-                let taskList = traverseForDisplay(parentTask);
-                for (let task of taskList) {
-                    taskSection.appendChild(task);
-                }
-
-                container.appendChild(taskSection);
-            }
-        })
-        .catch(error => console.log(error));
-}
-
-function generateTaskHTML(task, counter, listLength) {
+function generateTaskHTML(task) {
     let taskContainer = document.createElement("div");
+
     taskContainer.classList.add("task");
     taskContainer.dataset.type = "task";
     taskContainer.dataset.id = task.id;
+
     if (task.completed) taskContainer.classList.add("completed");
     if (task.after !== 0) taskContainer.classList.add("hasNext");
 
@@ -284,11 +195,10 @@ function generateTaskHTML(task, counter, listLength) {
     headerSection.appendChild(taskHeader);
 
     let taskCounter = document.createElement("p");
-    taskCounter.textContent = `${counter} / ${listLength}`;
+    // taskCounter.textContent = `${counter} / ${listLength}`;
     headerSection.appendChild(taskCounter);
 
     taskContainer.appendChild(headerSection);
-
 
 
     let taskBody = document.createElement("div");
@@ -306,7 +216,6 @@ function generateTaskHTML(task, counter, listLength) {
     taskBody.appendChild(taskDescription);
 
     taskContainer.appendChild(taskBody);
-
 
 
     let buttonSection = document.createElement("div");
@@ -336,8 +245,116 @@ function generateTaskHTML(task, counter, listLength) {
     taskContainer.append(buttonSection);
 
 
-
     return taskContainer;
+}
+
+
+function wireUpButtons(container) {
+    wireCompleteButton(container);
+    wireRemoveButton(container);
+    wireAddNextButton(container);
+    wireGlobalTaskForm(container);
+    wireEditTaskClickEvent(container);
+}
+
+// try to clean this up; somewhat messy looking
+function displayTaskLists(container) {
+    fetch('/get-tasks', {
+        method: 'GET'
+    })
+        .then(response => response.json())
+        .then(data => {
+            container.textContent = "";
+            container.classList.add("taskContainer");
+
+            let origins = data.origins;
+            let tasks = data.tasks;
+
+            // try to rewrite this into python maybe; return a clean format, like nested json for the list
+            for (let parentID of origins) {
+                let taskSection = document.createElement('div');
+                taskSection.classList.add('taskSection');
+                let task = generateTaskHTML(JSON.parse(tasks[parentID]));
+                console.log(tasks[parentID]);
+
+                taskSection.appendChild(task);
+                container.appendChild(taskSection);
+            }
+
+            /*
+            for (let parentID of origins) {
+                let parentTask = tasks[parentID];
+
+                let taskSection = document.createElement('div');
+                taskSection.classList.add('taskSection');
+                let listHeader = generateTopPiece(parentTask);
+
+                taskSection.appendChild(listHeader);
+
+
+                let taskList = traverseForDisplay(parentTask);
+                for (let task of taskList) {
+                    taskSection.appendChild(task);
+                }
+
+                container.appendChild(taskSection);
+            }
+             */
+        })
+        .catch(error => console.log(error));
+}
+
+
+// rewrite using fetch
+function initializeDarkMode(root) {
+    if (localStorage.getItem('darkMode') === null) {
+        localStorage.setItem('darkMode', JSON.stringify(false));
+        root.classList.add('darkMode');
+    }
+}
+
+
+function setup() {
+    const root = document.querySelector("body");
+    setupPageHTML(root);
+    initializeDarkMode(root);
+
+    const container = document.getElementById('listHolder');
+    wireUpButtons(container);
+
+    let headerContainer = document.getElementById('headerPiece');
+    wireDarkModeButton(headerContainer);
+
+    displayTaskLists(container);
+}
+
+// logic somewhat; decides cosmetic feature but is a calculation. move to python, use fetch to collect lists
+function calculateCompleted(rootNode) {
+    let lengthCounter = 0;
+    let completedCounter = 0;
+
+    if (rootNode !== null) {
+        let current = rootNode;
+        lengthCounter += 1;
+        if (rootNode.completed === true) {
+            completedCounter += 1;
+        }
+
+        if (rootNode.after !== 0) {
+            while (current.after !== 0) {
+
+                let nextTask = JSON.parse(localStorage.getItem(current.after));
+                lengthCounter += 1;
+                if (nextTask.completed === true) {
+                    completedCounter += 1;
+                }
+
+                current = nextTask;
+            }
+        }
+    }
+
+    return Math.floor((completedCounter / lengthCounter) * 100);
 }
 
 function findListLength(root) {
@@ -359,12 +376,12 @@ function findListLength(root) {
     return counter;
 }
 
-// goal: return a list of taskContainers, essentially a big collection of divs each for a task
+// most likely to stay, the "for display" is important. maybe don't build the list in the function though, just loop over a list
 function traverseForDisplay(task) {
     if (task !== null) { // if there's a first task
         let counter = 1;
         let maxValue = findListLength(task);
-        let listOfTasks = new Array(generateTaskHTML(task, counter, maxValue)); // create new list with node
+        let listOfTasks = new Array(generateTaskHTML(task, counter, maxValue)); // create new list with 1 node
 
         // now: basically look over the task's "after" value to see if there's an after, and add it to the list
         let current = task;
@@ -385,39 +402,22 @@ function traverseForDisplay(task) {
     }
 }
 
+
 function wireGlobalTaskForm(container) {
-    const addEventForm = document.getElementById("eventAdder");
+    const addEventForm = document.getElementById("taskAdder");
     addEventForm.addEventListener("submit", function (task) {
-        // prevent reload, grab data from form
-        task.preventDefault()
-        const formData = new FormData(addEventForm);
+        task.preventDefault();
 
-        // use data to create a new task
-        let newTask = new taskObject({
-            name: formData.get('eventName'),
-        });
+        const data = new FormData(addEventForm);
 
-        // add new task to the origin
-        let originsList = JSON.parse(localStorage.getItem('ORIGINS'));
-        originsList.push(newTask.id);
-
-        // add task and list to storage
-        localStorage.setItem('ORIGINS', JSON.stringify(originsList));
-        localStorage.setItem(newTask.id, JSON.stringify(newTask));
-
-        // new - send data to server
-        fetch("add-task", {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json",
-            },
-            body: JSON.stringify(newTask)
+        fetch("/add-task", {
+            method: 'POST',
+            body: data,
         })
             .then(response => response.json())
             .then(data => console.log(data))
             .catch(error => console.log(error));
 
-        // reset form data
         addEventForm.reset();
         displayTaskLists(container);
     });
@@ -484,10 +484,18 @@ function wireAddNextButton(container) {
 function wireCompleteButton(container) {
     container.addEventListener("click", function (event) {
         if (event.target.tagName === "BUTTON" && event.target.dataset.action === "complete") {
-            // grab task object and mark completed value true, store again
-            const task = JSON.parse(localStorage.getItem(event.target.dataset.id));
-            task.completed = true;
-            localStorage.setItem(event.target.dataset.id, JSON.stringify(task));
+            fetch('/complete', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    taskId: event.target.dataset.id,
+                }),
+            })
+                .then(response => response.json())
+                .then(data => console.log(data))
+                .catch(error => console.log(error));
 
             displayTaskLists(container);
         }
@@ -539,7 +547,7 @@ function wireRemoveButton(container) {
             if (!taskBefore && taskAfter) {
                 taskAfter.before = 0;
 
-                // update origins list
+                // make sure to update origins list
                 originsList.push(taskAfter.id);
             }
 
@@ -561,78 +569,8 @@ function wireRemoveButton(container) {
     })
 }
 
-/*
-function addToTaskList(locationID, key) {
-    // grab container, current task to add
-    const task = JSON.parse(localStorage[key]);
-    const container = document.getElementById(locationID);
 
-    // set up HTML content for task
-    const taskSection = document.createElement("div");
-    const completedClass = task.completed ? "completed" : "";
-    taskSection.innerHTML =
-        `<div class="task ${completedClass}">
-            <h1>${task.name}, id: ${task.id}</h1>
-            <p>${task.description}</p>
-            <p>previous task: ${task.before}, next task: ${task.after}</p>
-            <button id="${key}-remove">remove task</button>
-            <button id="${key}-complete">complete task</button>
-            <button id="${key}-after">add next</button>
-            <button id="${key}-display">display tree</button>
-        </div>`;
-
-    // visually add task to container
-    container.appendChild(taskSection);
-
-    // debug button
-    wireDisplayButton(key);
-}
-*/
-
-/*
-// DEBUG TOOLS
-// essentially traverse a nested list, using "after" as steps
-function displayDataStructureFromNode(key) {
-    console.log("displaying tree");
-
-    // generate container for list
-    let listHolder = document.getElementById("listHolder");
-
-    // grab the start object from key
-    let start = JSON.parse(localStorage.getItem(key));
-
-    // generate HTML from recursive function
-    listHolder.innerHTML = traverse(start);
-}
-
-// recursive function that steps through children, generating a list
-function traverse(node) {
-    // grab "child node" text from going to the lower node, if it exists
-    let childNode = "";
-    if (node.after !== 0) {
-        let subNode = JSON.parse(localStorage.getItem(node.after));
-        childNode = traverse(subNode);
-    }
-
-    // if no more children, then this returns; a piece of the list with the child nested inside
-    return `<ul>
-        <li>${node.name}</li>
-        ${childNode}
-    </ul>`;
-}
-
-// to generate a visual tree below all the tasks, step through one of the nodes (input is the "start", top). this is debug, not for user
-function wireDisplayButton(key) {
-    let button = document.getElementById(`${key}-display`);
-    button.addEventListener("click", function () {
-        displayDataStructureFromNode(key);
-    });
-}
-
- */
-
-
-
+// run when document is loaded! more complicated than defer
 document.addEventListener("DOMContentLoaded", function () {
     setup();
 });
