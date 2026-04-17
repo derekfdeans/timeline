@@ -267,39 +267,19 @@ function displayTaskLists(container) {
             container.textContent = "";
             container.classList.add("taskContainer");
 
-            let origins = data.origins;
-            let tasks = data.tasks;
+            for (let list of data) {
+                let taskContainer = document.createElement("div");
+                taskContainer.classList.add("taskContainer");
 
-            // try to rewrite this into python maybe; return a clean format, like nested json for the list
-            for (let parentID of origins) {
-                let taskSection = document.createElement('div');
-                taskSection.classList.add('taskSection');
-                let task = generateTaskHTML(JSON.parse(tasks[parentID]));
-                console.log(tasks[parentID]);
+                let list = {}
 
-                taskSection.appendChild(task);
-                container.appendChild(taskSection);
-            }
-
-            /*
-            for (let parentID of origins) {
-                let parentTask = tasks[parentID];
-
-                let taskSection = document.createElement('div');
-                taskSection.classList.add('taskSection');
-                let listHeader = generateTopPiece(parentTask);
-
-                taskSection.appendChild(listHeader);
-
-
-                let taskList = traverseForDisplay(parentTask);
-                for (let task of taskList) {
-                    taskSection.appendChild(task);
+                for (let task of list.tasks.entries()) {
+                    let taskHTML = generateTaskHTML(task);
+                    taskContainer.append(taskHTML);
                 }
 
-                container.appendChild(taskSection);
+                container.appendChild(taskContainer);
             }
-             */
         })
         .catch(error => console.log(error));
 }
@@ -491,13 +471,16 @@ function wireCompleteButton(container) {
                 },
                 body: JSON.stringify({
                     taskId: event.target.dataset.id,
+                    completed: true,
                 }),
             })
                 .then(response => response.json())
-                .then(data => console.log(data))
+                .then(data => {
+                    console.log(data);
+                    displayTaskLists(container);
+                })
                 .catch(error => console.log(error));
 
-            displayTaskLists(container);
         }
     })
 }
@@ -526,6 +509,19 @@ function wireDarkModeButton(container) {
 function wireRemoveButton(container) {
     container.addEventListener("click", function (event) {
         if (event.target.tagName === "BUTTON" && event.target.dataset.action === "remove") {
+
+            fetch('/delete-task', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({'taskId': event.target.dataset.id})
+            })
+                .then(response => response.json())
+                .then(data => console.log(data))
+                .catch(error => console.log(error));
+
+
             // if this one is pointed to by another task, or points to another, clean it up first
             let currentTask = JSON.parse(localStorage.getItem(event.target.dataset.id));
             let taskBefore = currentTask.before ? JSON.parse(localStorage.getItem(currentTask.before)) : 0;
