@@ -205,10 +205,7 @@ function generateTaskHTML(task) {
     taskBody.classList.add("taskBody");
 
     let dateTime = document.createElement("p");
-    let dateOfTask = new Date(+task.id);
-    let timeDifferenceInSeconds = Math.floor((Date.now() - dateOfTask) / 1000 / 60);
-    dateTime.textContent = `created ${timeDifferenceInSeconds} minutes ago`
-    dateTime.classList.add("subHeading");
+    // patch up "created x minutes ago" later
     taskBody.appendChild(dateTime);
 
     let taskDescription = document.createElement("p");
@@ -269,13 +266,10 @@ function displayTaskLists(container) {
 
             for (let list of data) {
                 let taskContainer = document.createElement("div");
-                taskContainer.classList.add("taskContainer");
+                taskContainer.classList.add("taskSection");
 
-                let list = {}
-
-                for (let task of list.tasks.entries()) {
-                    let taskHTML = generateTaskHTML(task);
-                    taskContainer.append(taskHTML);
+                for (let task of list.tasks) {
+                    taskContainer.append(generateTaskHTML(task));
                 }
 
                 container.appendChild(taskContainer);
@@ -388,18 +382,24 @@ function wireGlobalTaskForm(container) {
     addEventForm.addEventListener("submit", function (task) {
         task.preventDefault();
 
-        const data = new FormData(addEventForm);
+        const form_data = Object.fromEntries(new FormData(addEventForm));
 
         fetch("/add-task", {
             method: 'POST',
-            body: data,
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(form_data),
         })
             .then(response => response.json())
-            .then(data => console.log(data))
+            .then(data => {
+                console.log(data)
+
+                addEventForm.reset();
+                displayTaskLists(container);
+            })
             .catch(error => console.log(error));
 
-        addEventForm.reset();
-        displayTaskLists(container);
     });
 }
 
@@ -433,30 +433,25 @@ function wireAddNextButton(container) {
             if (title === null || title === "") {
                 return;
             }
-
             let description = prompt("new task description?");
-            let newTask = new taskObject({name: title, description: description});
 
-            let sourceTask = JSON.parse(localStorage.getItem(event.target.dataset.id));
-            let sourceTaskNext = sourceTask.after ? JSON.parse(localStorage.getItem(sourceTask.after)) : 0;
-
-            sourceTask.after = newTask.id; // source task's next task is current task
-            newTask.before = sourceTask.id; // current task's previous is previous task
-
-            // if there is an original next
-            if (sourceTaskNext !== 0) {
-                sourceTaskNext.before = newTask.id; // the previous task of the original source's next task is the new task's id
-                newTask.after = sourceTaskNext.id;
-            }
-
-            localStorage.setItem(newTask.id, JSON.stringify(newTask));
-            localStorage.setItem(sourceTask.id, JSON.stringify(sourceTask));
-
-            if (sourceTaskNext !== 0) {
-                localStorage.setItem(sourceTaskNext.id, JSON.stringify(sourceTaskNext));
-            }
-
-            displayTaskLists(container);
+            fetch("/add-next", {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    'newName': title,
+                    'newDescription': description,
+                    'taskId': event.target.dataset.id,
+                }),
+            })
+                .then(response => response.json())
+                .then(data => {
+                    console.log(data);
+                    displayTaskLists(container);
+                })
+                .catch(error => console.log(error));
         }
     })
 }
@@ -509,7 +504,6 @@ function wireDarkModeButton(container) {
 function wireRemoveButton(container) {
     container.addEventListener("click", function (event) {
         if (event.target.tagName === "BUTTON" && event.target.dataset.action === "remove") {
-
             fetch('/delete-task', {
                 method: 'POST',
                 headers: {
@@ -518,49 +512,11 @@ function wireRemoveButton(container) {
                 body: JSON.stringify({'taskId': event.target.dataset.id})
             })
                 .then(response => response.json())
-                .then(data => console.log(data))
+                .then(data => {
+                    console.log(data)
+                    displayTaskLists(container);
+                })
                 .catch(error => console.log(error));
-
-
-            // if this one is pointed to by another task, or points to another, clean it up first
-            let currentTask = JSON.parse(localStorage.getItem(event.target.dataset.id));
-            let taskBefore = currentTask.before ? JSON.parse(localStorage.getItem(currentTask.before)) : 0;
-            let taskAfter = currentTask.after ? JSON.parse(localStorage.getItem(currentTask.after)) : 0;
-            let originsList = JSON.parse(localStorage.getItem('ORIGINS'));
-
-            // if it's between two objects
-            if (taskBefore && taskAfter) {
-                taskBefore.after = taskAfter.id;
-                taskAfter.before = taskBefore.id;
-            }
-
-            // if it's at end of list
-            if (taskBefore && !taskAfter) {
-                taskBefore.after = 0;
-            }
-
-            // if it's at start of a list and there's a next
-            if (!taskBefore && taskAfter) {
-                taskAfter.before = 0;
-
-                // make sure to update origins list
-                originsList.push(taskAfter.id);
-            }
-
-            // remove task from storage and origins list
-            originsList = originsList.filter(id => id !== currentTask.id);
-            localStorage.removeItem(event.target.dataset.id);
-
-            if (taskBefore !== 0) {
-                localStorage.setItem(taskBefore.id, JSON.stringify(taskBefore));
-            }
-            if (taskAfter !== 0) {
-                localStorage.setItem(taskAfter.id, JSON.stringify(taskAfter));
-            }
-
-            localStorage.setItem('ORIGINS', JSON.stringify(originsList));
-
-            displayTaskLists(container);
         }
     })
 }
