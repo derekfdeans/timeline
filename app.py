@@ -19,7 +19,6 @@ database = SQLAlchemy(model_class=Base)
 app = Flask(__name__)
 
 app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///timeline.db"
-# app.config['SQLALCHEMY_ECHO'] = True enable for sql logging
 database.init_app(app)
 
 '''
