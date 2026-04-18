@@ -5,21 +5,21 @@ import uuid
 
 from flask import Flask, render_template, request, jsonify
 from flask_sqlalchemy import SQLAlchemy
-from jinja2.lexer import describe_token_expr
 from sqlalchemy import ForeignKey, Date
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, relationship
 
 
-# database work
 class Base(DeclarativeBase):
+    # add metadata if desired later
     pass
 
 
 database = SQLAlchemy(model_class=Base)
 
 app = Flask(__name__)
+
 app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///timeline.db"
-# app.config['SQLALCHEMY_ECHO'] = True
+# app.config['SQLALCHEMY_ECHO'] = True enable for sql logging
 database.init_app(app)
 
 '''
@@ -31,61 +31,6 @@ lists
     task -> task
 '''
 
-
-# old classess
-
-class Task:
-    def __init__(self, name, description=""):
-        self.id = str(uuid.uuid4())
-        self.date = datetime.date.today()
-        self.name = name
-        self.description = description
-        self.completed = False
-        self.subtasks = []
-
-    def to_dict(self):
-        return {
-            'id': self.id,
-            'date': self.date,
-            'name': self.name,
-            'description': self.description,
-            'completed': self.completed,
-            'subtasks': [subtask.to_dict() for subtask in self.subtasks],
-        }
-
-
-class Subtask:
-    def __init__(self, description):
-        self.id = str(uuid.uuid4())
-        self.description = description
-        self.completed = False
-
-    def to_dict(self):
-        return {
-            'id': self.id,
-            'description': self.description,
-            'completed': self.completed,
-        }
-
-
-class ListHeader:
-    def __init__(self):
-        self.id = str(uuid.uuid4())
-        self.date = datetime.date.today()
-        self.tasks = []
-
-    def to_dict(self):
-        return {
-            'id': self.id,
-            'date': self.date,
-            'tasks': {
-                task.id: task.to_dict()
-                for task in self.tasks
-            },
-        }
-
-
-# new database classes
 
 class BaseTask(database.Model):
     __tablename__ = "task"
@@ -109,6 +54,7 @@ class BaseTask(database.Model):
             'home_list': self.home_list,
         }
 
+
 class BaseSubtask(database.Model):
     __tablename__ = 'subtask'
 
@@ -126,6 +72,7 @@ class BaseSubtask(database.Model):
         }
 
 
+# rewrite into some "list overview" manager; hold completed information for tasks
 class BaseListHeader(database.Model):
     __tablename__ = 'list'
 
@@ -143,7 +90,6 @@ class BaseListHeader(database.Model):
 
 with app.app_context():
     database.create_all()
-    print("created database")
 
 
 @app.route("/")
@@ -205,6 +151,7 @@ def delete_task():
 
     return jsonify({"response": 'task deleted'})
 
+
 @app.route('/add-next', methods=['POST'])
 def add_next_task():
     data = request.get_json()
@@ -220,6 +167,7 @@ def add_next_task():
     database.session.commit()
 
     return jsonify({"response": 'next task added'})
+
 
 if __name__ == "__main__":
     app.run(debug=True)
