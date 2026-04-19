@@ -1,3 +1,61 @@
+/*
+If you want a practical refactor path, do it in this order:
+
+1.Add generateListHTML(list) in ui.js. It should create the section, append the top piece, loop tasks, and return the whole list DOM node.
+
+2.Add generateTaskBlock(task) in ui.js. It should create the wrapper div, append the task card, append the subtask holder, and return it.
+
+3.Shrink displayTaskLists() so it only:
+    ◦fetches
+    ◦clears container
+    ◦loops data
+    ◦appends generateListHTML(list)
+ */
+
+export function generateListHTML(list) {
+    let listSection = document.createElement("div");
+    listSection.classList.add("listSection");
+
+    let header = generateTopPiece(list);
+    listSection.append(header);
+
+    for (let task of list.tasks) {
+        listSection.append(generateTaskBlock(task));
+    }
+
+    return listSection;
+}
+
+export function generateSubtaskBlock(task) {
+    let subtaskContainer = document.createElement("div");
+    subtaskContainer.classList.add("subtaskContainer");
+    let subtaskHeader = document.createElement('p');
+    subtaskHeader.classList.add("subtaskHeader");
+    subtaskHeader.textContent = 'subtasks: '
+    subtaskContainer.append(subtaskHeader);
+
+    for (let subtask of task.subtasks) {
+        subtaskContainer.append(generateSubtaskHTML(subtask));
+    }
+
+    return subtaskContainer;
+}
+
+export function generateTaskBlock(task) {
+    let taskWrapper = document.createElement("div");
+
+    let taskTile = document.createElement("div");
+    taskTile.append(generateTaskHTML(task));
+    taskWrapper.append(taskTile);
+
+    if (task.subtasks.length !== 0) {
+        let subtaskContainer = generateSubtaskBlock(task);
+        taskWrapper.append(subtaskContainer);
+    }
+
+    return taskWrapper;
+}
+
 export function generateHeaderPiece(container) {
     let headerPiece = document.createElement("div");
     headerPiece.classList.add("headerPiece");
@@ -90,15 +148,22 @@ export function generateFormPiece(container) {
     container.append(formContainer);
 }
 
-// don't forget about this lol
-export function generateTopPiece() {
-    // top piece
+export function generateTopPiece(list) {
     let listHeader = document.createElement("div");
     listHeader.classList.add('task', 'taskHeader');
+
+    // TODO finish completed %
     let completedNote = document.createElement("p");
     completedNote.textContent = `completed: `;
 
+    let addNextTaskButton = document.createElement("button");
+    addNextTaskButton.dataset.id = list.id
+    addNextTaskButton.dataset.action = "addNext";
+    addNextTaskButton.textContent = "add next";
+    addNextTaskButton.classList.add("button");
+
     listHeader.appendChild(completedNote);
+    listHeader.appendChild(addNextTaskButton);
 
     return listHeader;
 }
@@ -162,15 +227,24 @@ export function generateTaskHTML(task) {
     completeTaskButton.classList.add("button");
     buttonSection.appendChild(completeTaskButton);
 
-    let addNextTaskButton = document.createElement("button");
-    addNextTaskButton.dataset.id = task.id
-    addNextTaskButton.dataset.action = "addNext";
-    addNextTaskButton.textContent = "add next";
-    addNextTaskButton.classList.add("button");
-    buttonSection.appendChild(addNextTaskButton);
+    let newSubtaskButton = document.createElement("button");
+    newSubtaskButton.dataset.id = task.id
+    newSubtaskButton.dataset.action = "addSubtask";
+    newSubtaskButton.textContent = "subtask";
+    newSubtaskButton.classList.add("button");
+    buttonSection.appendChild(newSubtaskButton);
 
     taskContainer.append(buttonSection);
 
 
     return taskContainer;
+}
+
+export function generateSubtaskHTML(subtask) {
+    let subtaskButton = document.createElement('button');
+    subtaskButton.dataset.id = subtask.id;
+    subtaskButton.dataset.action = "completeSubtask";
+    subtaskButton.classList.add("subtask");
+    subtaskButton.textContent = subtask.content;
+    return subtaskButton;
 }

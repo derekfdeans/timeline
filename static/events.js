@@ -1,4 +1,4 @@
-import {generateTaskHTML} from "./ui.js";
+import {generateListHTML, generateSubtaskHTML, generateTaskHTML, generateTopPiece} from "./ui.js";
 
 export function displayTaskLists(container) {
     fetch('/get-tasks', {
@@ -10,14 +10,7 @@ export function displayTaskLists(container) {
             container.classList.add("taskContainer");
 
             for (let list of data) {
-                let taskContainer = document.createElement("div");
-                taskContainer.classList.add("taskSection");
-
-                for (let task of list.tasks) {
-                    taskContainer.append(generateTaskHTML(task));
-                }
-
-                container.appendChild(taskContainer);
+                container.append(generateListHTML(list));
             }
         })
         .catch(error => console.log(error));
@@ -28,6 +21,8 @@ export function wireElements(container) {
     wireRemoveButton(container);
     wireAddNextButton(container);
     wireGlobalTaskForm(container);
+    wireAddSubtaskButton(container);
+    wireCompleteSubtaskButton(container);
     wireDarkModeButton();
 }
 
@@ -60,6 +55,21 @@ function wireGlobalTaskForm(container) {
     });
 }
 
+/*
+goal for 04-19-2026:
+embrace task categories - expand "listHeader" database class
+displaytasklists should add an html piece for the list header, display:
+    a header title (or just list 01)
+    completed task info
+    a button to add tasks to the list (move it out of tasks)
+
+knock-off effects:
+    add_task button doesn't exist, but replace it with "add subtask"
+        yay we're implementing subtask!
+    update display again
+        display the subtasks as like "buttons" with just titles
+        click to complete, turn green
+ */
 
 // BUTTONS
 
@@ -82,11 +92,39 @@ function wireDarkModeButton() {
     })
 }
 
+function wireAddSubtaskButton(container) {
+    container.addEventListener("click", function (event) {
+        if (event.target.tagName === "BUTTON" && event.target.dataset.action === "addSubtask") {
+            let title = prompt("new task name?");
+            if (title === null || title === "") {
+                return;
+            }
+
+            fetch("/add-subtask", {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    'newName': title,
+                    'taskId': event.target.dataset.id,
+                }),
+            })
+                .then(response => response.json())
+                .then(data => {
+                    console.log(data)
+                    displayTaskLists(container);
+                    // do something
+                })
+                .catch(error => console.log(error));
+        }
+    })
+}
+
 function wireAddNextButton(container) {
     container.addEventListener("click", function (event) {
-        // pull up source task and its next, if it has one
         if (event.target.tagName === "BUTTON" && event.target.dataset.action === "addNext") {
-            // collect new task data and build object
+            // TODO rewrite as a popup window prompt - not alerts
             let title = prompt("new task name?");
             if (title === null || title === "") {
                 return;
@@ -101,7 +139,7 @@ function wireAddNextButton(container) {
                 body: JSON.stringify({
                     'newName': title,
                     'newDescription': description,
-                    'taskId': event.target.dataset.id,
+                    'listId': event.target.dataset.id,
                 }),
             })
                 .then(response => response.json())
@@ -146,11 +184,35 @@ function wireRemoveButton(container) {
                 headers: {
                     'Content-Type': 'application/json',
                 },
-                body: JSON.stringify({'taskId': event.target.dataset.id})
+                body: JSON.stringify({
+                    'taskId': event.target.dataset.id
+                }),
             })
                 .then(response => response.json())
                 .then(data => {
                     console.log(data)
+                    displayTaskLists(container);
+                })
+                .catch(error => console.log(error));
+        }
+    })
+}
+
+function wireCompleteSubtaskButton(container) {
+    container.addEventListener("click", function (event) {
+        if (event.target.tagName === "BUTTON" && event.target.dataset.action === "completeSubtask") {
+            fetch('/complete-subtask', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    'subtaskId': event.target.dataset.id,
+                }),
+            })
+                .then(response => response.json())
+                .then(data => {
+                    console.log(data);
                     displayTaskLists(container);
                 })
                 .catch(error => console.log(error));

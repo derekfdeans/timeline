@@ -58,14 +58,14 @@ class BaseSubtask(database.Model):
     __tablename__ = 'subtask'
 
     id: Mapped[str] = mapped_column(primary_key=True, default=lambda: str(uuid.uuid4()))
-    description: Mapped[str] = mapped_column()
+    content: Mapped[str] = mapped_column()
     completed: Mapped[bool] = mapped_column(default=False)
     home_task: Mapped[str] = mapped_column(ForeignKey('task.id'))
 
     def to_dict(self):
         return {
             'id': self.id,
-            'description': self.description,
+            'content': self.content,
             'completed': self.completed,
             'home_task': self.home_task,
         }
@@ -155,17 +155,40 @@ def delete_task():
 def add_next_task():
     data = request.get_json()
 
-    current_task = database.session.get(BaseTask, data.get('taskId'))
-    parent_list_id = current_task.home_list
+    current_list = database.session.get(BaseListHeader, data.get('listId'))
 
     new_name = data.get("newName")
     new_description = data.get("newDescription")
-    new_task = BaseTask(name=new_name, description=new_description, home_list=parent_list_id)
+    new_task = BaseTask(name=new_name, description=new_description, home_list=current_list.id)
 
     database.session.add(new_task)
     database.session.commit()
 
     return jsonify({"response": 'next task added'})
+
+
+@app.route('/add-subtask', methods=['POST'])
+def add_subtask():
+    data = request.get_json()
+
+    current_task = database.session.get(BaseTask, data.get('taskId'))
+    new_subtask = BaseSubtask(content=data.get('newName'))
+
+    current_task.subtasks.append(new_subtask)
+    database.session.commit()
+
+    return jsonify({'response': 'subtask added'})
+
+@app.route('/complete-subtask', methods=['POST'])
+def complete_subtask():
+    data = request.get_json()
+
+    current_subtask = database.session.get(BaseSubtask, data.get('subtaskId'))
+
+    database.session.delete(current_subtask)
+    database.session.commit()
+
+    return jsonify({'response': 'subtask completed'})
 
 
 if __name__ == "__main__":

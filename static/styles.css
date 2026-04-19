@@ -62,10 +62,11 @@ body {
     background-color: var(--main-color-hover);
 }
 
-.taskSection {
+.listSection {
     display: flex;
     flex-direction: column;
     gap: 30px;
+    width: 225px
     /*
     border: 1px solid var(--main-color);
     border-radius: 5px;
@@ -94,7 +95,7 @@ body {
     display: flex;
     justify-content: space-between;
     flex-wrap: nowrap;
-    gap: 10px;
+    gap: 5px;
 }
 
 .button {
@@ -112,6 +113,36 @@ body {
 .button:hover {
     transition: all 0.2s ease-in-out;
     box-shadow: 0 0 solid var(--main-color-hover);
+}
+
+.subtask {
+    background-color: white;
+    border: 1px solid var(--main-color);
+    border-radius: 5px;
+    font-weight: bold;
+    cursor: pointer;
+    height: fit-content;
+
+    transition: all 0.2s ease-in-out;
+}
+
+.subtaskHeader {
+    margin: 0;
+}
+
+.subtask:hover {
+    transition: all 0.2s ease-in-out;
+    background-color: green;
+}
+
+.subtaskContainer {
+    margin-top: 5px;
+    margin-bottom: 5px;
+
+    align-items: center;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 5px;
 }
 
 .taskHeader {

@@ -18,19 +18,17 @@ figure out more fancy timing system: seconds when less than a minute, minutes wh
 
 eventually add cross-device support -> login system !
     this is all BACKEND WORK
-
     tools:
-        railway for lightweight hosting (this is the multi-device piece)
         learn authentication - data security
-
     when done with server, think about WEBSOCKETS ( live updates, fun )
-
 
 
 code-side edits: save for end (when features are all added)
 REFACTOR.
     ensure readability
  */
+
+
 
 import {setupPageHTML} from "./ui.js"
 import {wireElements, displayTaskLists} from "./events.js"
