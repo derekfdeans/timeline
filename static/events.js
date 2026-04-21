@@ -11,6 +11,10 @@ export function displayTaskLists(container) {
 
             for (let list of data) {
                 container.append(generateListHTML(list));
+
+                let hrElement = document.createElement('div');
+                hrElement.classList.add("horizontal-line");
+                container.append(hrElement);
             }
         })
         .catch(error => console.log(error));
@@ -27,8 +31,48 @@ export function wireElements(container) {
 }
 
 
-// FORMS
+// work out with flask/database
+function wireDarkModeButton() {
+    let button = document.getElementById("darkModeButton");
+    button.addEventListener("click", function () {
+        let bodySection = document.querySelector("body");
+        let darkModeSetting = JSON.parse(localStorage.getItem('darkMode'));
 
+        if (darkModeSetting === true) {
+            bodySection.classList.remove("darkMode");
+            bodySection.classList.add("lightMode");
+            darkModeSetting = false;
+        } else if (darkModeSetting === false) {
+            bodySection.classList.remove("lightMode");
+            bodySection.classList.add("darkMode");
+            darkModeSetting = true;
+        }
+    })
+}
+
+// rewrite with flask - missing functionality components
+function wireEditTaskClickEvent(container) {
+    container.addEventListener("click", function (event) {
+        if (event.target.tagName === "DIV" && event.target.dataset.type === "task") {
+
+            let taskId = event.target.dataset.id;
+            let newDescription = prompt("new description?");
+
+            if (newDescription === null || newDescription === "") {
+                return;
+            }
+
+            let currentTask = JSON.parse(localStorage.getItem(taskId));
+            currentTask.description = newDescription;
+
+            localStorage.setItem(taskId, JSON.stringify(currentTask));
+
+            displayTaskLists(container);
+        }
+    })
+}
+
+// FORMS
 function wireGlobalTaskForm(container) {
     const addEventForm = document.getElementById("taskAdder");
     addEventForm.addEventListener("submit", function (task) {
@@ -55,43 +99,7 @@ function wireGlobalTaskForm(container) {
     });
 }
 
-/*
-goal for 04-19-2026:
-embrace task categories - expand "listHeader" database class
-displaytasklists should add an html piece for the list header, display:
-    a header title (or just list 01)
-    completed task info
-    a button to add tasks to the list (move it out of tasks)
-
-knock-off effects:
-    add_task button doesn't exist, but replace it with "add subtask"
-        yay we're implementing subtask!
-    update display again
-        display the subtasks as like "buttons" with just titles
-        click to complete, turn green
- */
-
 // BUTTONS
-
-// work out with flask/database
-function wireDarkModeButton() {
-    let button = document.getElementById("darkModeButton");
-    button.addEventListener("click", function () {
-        let bodySection = document.querySelector("body");
-        let darkModeSetting = JSON.parse(localStorage.getItem('darkMode'));
-
-        if (darkModeSetting === true) {
-            bodySection.classList.remove("darkMode");
-            bodySection.classList.add("lightMode");
-            darkModeSetting = false;
-        } else if (darkModeSetting === false) {
-            bodySection.classList.remove("lightMode");
-            bodySection.classList.add("darkMode");
-            darkModeSetting = true;
-        }
-    })
-}
-
 function wireAddSubtaskButton(container) {
     container.addEventListener("click", function (event) {
         if (event.target.tagName === "BUTTON" && event.target.dataset.action === "addSubtask") {
@@ -219,27 +227,3 @@ function wireCompleteSubtaskButton(container) {
         }
     })
 }
-
-
-// rewrite with flask - missing functionality components
-function wireEditTaskClickEvent(container) {
-    container.addEventListener("click", function (event) {
-        if (event.target.tagName === "DIV" && event.target.dataset.type === "task") {
-
-            let taskId = event.target.dataset.id;
-            let newDescription = prompt("new description?");
-
-            if (newDescription === null || newDescription === "") {
-                return;
-            }
-
-            let currentTask = JSON.parse(localStorage.getItem(taskId));
-            currentTask.description = newDescription;
-
-            localStorage.setItem(taskId, JSON.stringify(currentTask));
-
-            displayTaskLists(container);
-        }
-    })
-}
-

@@ -14,9 +14,10 @@ If you want a practical refactor path, do it in this order:
 
 export function generateListHTML(list) {
     let listSection = document.createElement("div");
-    listSection.classList.add("listSection");
+    listSection.classList.add("tileContainer");
 
     let header = generateTopPiece(list);
+    header.classList.add("listHeader");
     listSection.append(header);
 
     for (let task of list.tasks) {
@@ -100,14 +101,13 @@ export function generateMiddleHTML(container) {
 export function generateFormPiece(container) {
     let formContainer = document.createElement("div");
     formContainer.id = "formContainer";
-    formContainer.classList.add("formContainer");
-    formContainer.classList.add("mainSection");
+    formContainer.classList.add('mainSection')
 
     let form = document.createElement("form");
     form.id = "taskAdder";
+    form.classList.add("form");
 
-    let nameSection = document.createElement("div");
-    nameSection.classList.add("nameSection");
+
 
     let nameLabel = document.createElement("label");
     nameLabel.textContent = "new category task: ";
@@ -118,39 +118,39 @@ export function generateFormPiece(container) {
     nameInput.id = "taskName";
     nameInput.name = "taskName";
 
-    nameSection.append(nameLabel, nameInput);
-    form.appendChild(nameSection);
+    form.append(nameLabel, nameInput);
 
 
-    let descriptionSection = document.createElement("div");
+
     let descriptionLabel = document.createElement("label");
     descriptionLabel.textContent = "description: ";
-    nameLabel.setAttribute("for", "taskDescription");
+    descriptionLabel.setAttribute("for", "taskDescription");
 
     let descriptionInput = document.createElement("input");
     descriptionInput.type = "text";
     descriptionInput.id = "taskDescription";
     descriptionInput.name = "taskDescription";
 
-    descriptionSection.append(descriptionLabel, descriptionInput);
-    form.appendChild(descriptionSection);
+    form.append(descriptionLabel, descriptionInput);
+
+
 
     let submitButton = document.createElement("input");
     submitButton.type = "submit";
     submitButton.textContent = "add task";
-    submitButton.classList.add("button");
-    submitButton.classList.add("submitButton");
 
     form.append(submitButton);
 
     formContainer.append(form);
+
+
 
     container.append(formContainer);
 }
 
 export function generateTopPiece(list) {
     let listHeader = document.createElement("div");
-    listHeader.classList.add('task', 'taskHeader');
+    listHeader.classList.add('taskHeader');
 
     // TODO finish completed %
     let completedNote = document.createElement("p");
@@ -169,9 +169,12 @@ export function generateTopPiece(list) {
 }
 
 export function setupPageHTML(root) {
+    root.classList.add('container');
+
     generateHeaderPiece(root);
-    generateFormPiece(root);
     generateMiddleHTML(root);
+    generateFormPiece(root);
+
 }
 
 export function generateTaskHTML(task) {
@@ -247,4 +250,58 @@ export function generateSubtaskHTML(subtask) {
     subtaskButton.classList.add("subtask");
     subtaskButton.textContent = subtask.content;
     return subtaskButton;
+}
+
+
+export function generatePage(root) {
+    let page = document.createElement("div");
+    page.classList.add('page');
+
+    let navigationSection = document.createElement("div");
+
+    let titleContainer = document.createElement("div");
+    let pageTitle = document.createElement("p");
+    pageTitle.classList.add('pageTitle');
+    pageTitle.textContent = 'Timeline';
+    titleContainer.appendChild(pageTitle);
+
+    let directoryContainer = document.createElement("div");
+    directoryContainer.classList.add('directoryContainer');
+
+    let loginContainer = document.createElement("div");
+    loginContainer.classList.add('loginContainer');
+
+    navigationSection.appendChild(titleContainer);
+    navigationSection.appendChild(directoryContainer);
+    navigationSection.append(loginContainer);
+
+
+
+    let mainContent = document.createElement("div");
+    mainContent.classList.add('mainContent');
+
+    let taskSection = document.createElement("div");
+    let listContainer = document.createElement("div");
+
+    let headerTile = document.createElement("div");
+    headerTile.textContent = "header"
+
+    let taskContainer = document.createElement("div");
+
+    let taskTile = document.createElement("div");
+    taskTile.textContent = "task"
+    let subtaskSubtile = document.createElement("div");
+    subtaskSubtile.textContent = "subtask"
+
+    taskContainer.append(taskTile, subtaskSubtile);
+
+    let addNextTile = document.createElement("div");
+    addNextTile.textContent = "add next"
+
+    listContainer.append(headerTile, taskTile, addNextTile);
+    taskSection.append(listContainer);
+    mainContent.appendChild(taskSection);
+
+    page.append(navigationSection, mainContent);
+    root.append(page);
 }

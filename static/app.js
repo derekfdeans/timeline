@@ -30,12 +30,12 @@ REFACTOR.
 
 
 
-import {setupPageHTML} from "./ui.js"
+import {setupPageHTML, generatePage} from "./ui.js"
 import {wireElements, displayTaskLists} from "./events.js"
 
 function setup() {
     const root = document.querySelector("body");
-    setupPageHTML(root);
+    generatePage(root);
 
     const container = document.getElementById('listHolder');
     wireElements(container);
