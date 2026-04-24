@@ -12,6 +12,8 @@ If you want a practical refactor path, do it in this order:
     ◦appends generateListHTML(list)
  */
 
+import {wireForm} from "./events.js";
+
 export function generateListHTML(list) {
     let listSection = document.createElement("div");
     listSection.classList.add("listContainer");
@@ -110,7 +112,6 @@ export function generateFormPiece(container) {
     form.classList.add("form");
 
 
-
     let nameLabel = document.createElement("label");
     nameLabel.textContent = "new category task: ";
     nameLabel.setAttribute("for", "taskName");
@@ -123,7 +124,6 @@ export function generateFormPiece(container) {
     form.append(nameLabel, nameInput);
 
 
-
     let descriptionLabel = document.createElement("label");
     descriptionLabel.textContent = "description: ";
     descriptionLabel.setAttribute("for", "taskDescription");
@@ -134,7 +134,6 @@ export function generateFormPiece(container) {
     descriptionInput.name = "taskDescription";
 
     form.append(descriptionLabel, descriptionInput);
-
 
 
     let submitButton = document.createElement("input");
@@ -250,48 +249,125 @@ export function generateListBlock(container, data) {
 }
 
 
+function generateNavigation() {
+    let navSidebar = document.createElement("div");
+    navSidebar.classList.add('sidebar');
+    navSidebar.id = 'nav-content';
+
+    let sidebarHeader = document.createElement("div");
+    sidebarHeader.classList.add('sidebar-header');
+    generateSidebarHeader(sidebarHeader);
+
+    let sidebarList = document.createElement("div");
+    sidebarList.classList.add('sidebar-list');
+    sidebarList.id = 'sidebar-list';
+
+    let sidebarFooter = document.createElement("div");
+    sidebarFooter.classList.add('sidebar-footer');
+    generateSidebarFooter(sidebarFooter);
+
+    navSidebar.append(sidebarHeader, sidebarList, sidebarFooter);
+    return navSidebar;
+}
+
+function generateSidebarHeader(sidebarHeader) {
+    let header = document.createElement("h1");
+    header.textContent = "timeline";
+
+    sidebarHeader.append(header);
+}
+
+export function getDataAndRender() {
+    fetch('/get-tasks', {
+        method: 'GET',
+    })
+        .then(response => response.json())
+        .then(data => {
+            // sidebar piece
+            let sidebarList = document.getElementById('sidebar-list');
+            sidebarList.textContent = '';
+            console.log(typeof data);
+            generateSidebarList(sidebarList, data);
+
+            // main content piece
+            let mainSection = document.getElementById('content-body');
+            generateListBlock(mainSection, data);
+        })
+        .catch(error => console.log(error));
+}
+
+function generateSidebarList(sidebarList, data) {
+    for (let list of data) {
+        sidebarList.append(generateSidebarListPiece(list));
+    }
+}
+
+function generateSidebarListPiece(list) {
+    let listHolder = document.createElement("div");
+
+    let listHeader = document.createElement("div");
+    let listName = document.createElement("p");
+    listName.textContent = list.name;
+    let listCompleted = document.createElement("p");
+    listCompleted.textContent = "% completed";
+
+    listHeader.append(listName, listCompleted);
+    listHolder.append(listHeader);
+
+    let bulletedList = document.createElement('div');
+
+    for (let task of list.tasks) {
+        let listElement = document.createElement("div");
+
+        let taskText = document.createElement("p");
+        taskText.textContent = task.name;
+
+        let taskComplete = document.createElement("input");
+        taskComplete.type = 'checkbox';
+        taskComplete.dataset.id = task.id;
+        taskComplete.textContent = "done";
+
+        listElement.append(taskComplete, taskText);
+        bulletedList.append(listElement);
+    }
+
+    listHolder.append(bulletedList);
+    return listHolder;
+}
+
+function generateSidebarFooter(sidebarFooter) {
+    let avatar = document.createElement("div");
+    avatar.classList.add('avatar');
+    avatar.textContent = 'user'
+
+    let settingsButton = document.createElement("button");
+    settingsButton.classList.add('settings-button');
+    settingsButton.textContent = 'settings';
+
+    sidebarFooter.append(avatar, settingsButton);
+}
+
+function generateMainContent() {
+    let mainContent = document.createElement("div");
+    mainContent.classList.add('main-content');
+    mainContent.id = 'main-content';
+
+    let contentHeader = document.createElement("div");
+    contentHeader.classList.add('content-header');
+
+    let contentBody = document.createElement('div');
+    contentBody.classList.add('content-body');
+    contentBody.id = 'content-body';
+
+    mainContent.append(contentHeader, contentBody);
+    return mainContent;
+}
+
 export function generatePage(root) {
     let page = document.createElement("div");
     page.classList.add('page');
 
-    function generateNavigation() {
-        let navigationSection = document.createElement("div");
-        navigationSection.id = 'navContent';
-        navigationSection.classList.add('navigationSection');
-
-
-        let titleContainer = document.createElement("div");
-        let pageTitle = document.createElement("p");
-        pageTitle.classList.add('pageTitle');
-        pageTitle.textContent = 'Timeline';
-        titleContainer.appendChild(pageTitle);
-
-        let directoryContainer = document.createElement("div");
-        directoryContainer.classList.add('directoryContainer');
-        directoryContainer.id = 'directoryContainer';
-
-        let loginContainer = document.createElement("div");
-        loginContainer.classList.add('loginContainer');
-
-        navigationSection.appendChild(titleContainer);
-        navigationSection.appendChild(directoryContainer);
-        navigationSection.append(loginContainer);
-        return navigationSection;
-    }
     let navigationSection = generateNavigation();
-
-    function generateMainContent() {
-        let mainContent = document.createElement("div");
-        mainContent.id = 'mainContent';
-        mainContent.classList.add('mainContent');
-
-        let listHolder = document.createElement('div');
-        listHolder.id = 'listHolder';
-
-        mainContent.append(listHolder);
-
-        return mainContent;
-    }
     let mainContent = generateMainContent();
 
     page.append(navigationSection, mainContent);

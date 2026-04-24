@@ -17,7 +17,6 @@ figure out more fancy timing system: seconds when less than a minute, minutes wh
 
 
 eventually add cross-device support -> login system !
-    this is all BACKEND WORK
     tools:
         learn authentication - data security
     when done with server, think about WEBSOCKETS ( live updates, fun )
@@ -29,24 +28,21 @@ REFACTOR.
  */
 
 
-
-import {generatePage, generateFormPiece} from "./ui.js"
-import {wireElements, displayTaskLists, wireForm} from "./events.js"
+import {generatePage, generateFormPiece, getDataAndRender} from "./ui.js"
+import {wireButtons, wireForm} from "./events.js"
 
 function setup() {
     const root = document.querySelector("body");
     generatePage(root);
 
-    const mainContainer = document.getElementById('mainContent');
-    const navContainer = document.getElementById('directoryContainer');
+    const navContent = document.getElementById('nav-content');
+    generateFormPiece(navContent);
+    wireForm(navContent);
 
-    generateFormPiece(navContainer);
-    wireForm(navContainer);
+    getDataAndRender();
 
-    let listHolder = document.getElementById('listHolder');
-    displayTaskLists(listHolder);
-    wireElements(mainContainer);
-
+    const bodyContent = document.getElementById('content-body');
+    wireButtons(bodyContent);
 }
 
 // run when document is loaded! more complicated than defer

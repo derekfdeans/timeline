@@ -1,20 +1,6 @@
 import {generateListBlock, generateListHTML} from "./ui.js";
 
-export function displayTaskLists(container) {
-    fetch('/get-tasks', {
-        method: 'GET'
-    })
-        .then(response => response.json())
-        .then(data => {
-            container.textContent = "";
-            container.classList.add("taskContainer");
-
-            generateListBlock(container, data);
-        })
-        .catch(error => console.log(error));
-}
-
-export function wireElements(container) {
+export function wireButtons(container) {
     wireCompleteButton(container);
     wireRemoveButton(container);
     wireAddNextButton(container);
@@ -115,8 +101,6 @@ function wireAddSubtaskButton(container) {
                 .then(response => response.json())
                 .then(data => {
                     console.log(data)
-                    displayTaskLists(container);
-                    // do something
                 })
                 .catch(error => console.log(error));
         }
@@ -147,7 +131,6 @@ function wireAddNextButton(container) {
                 .then(response => response.json())
                 .then(data => {
                     console.log(data);
-                    displayTaskLists(container);
                 })
                 .catch(error => console.log(error));
         }
@@ -170,7 +153,6 @@ function wireCompleteButton(container) {
                 .then(response => response.json())
                 .then(data => {
                     console.log(data);
-                    displayTaskLists(container);
                 })
                 .catch(error => console.log(error));
 
@@ -193,7 +175,6 @@ function wireRemoveButton(container) {
                 .then(response => response.json())
                 .then(data => {
                     console.log(data)
-                    displayTaskLists(container);
                 })
                 .catch(error => console.log(error));
         }
@@ -215,7 +196,6 @@ function wireCompleteSubtaskButton(container) {
                 .then(response => response.json())
                 .then(data => {
                     console.log(data);
-                    displayTaskLists(container);
                 })
                 .catch(error => console.log(error));
         }
