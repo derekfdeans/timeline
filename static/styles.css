@@ -12,52 +12,48 @@
 }
 
 div {
-    padding: 5px;
     border: 1px solid black;
 }
 
 /* organization classes */
-/* header */
-.container {
-    width: 700px;
-    justify-self: center;
-}
-
-.headerPiece {
-    display: flex;
-    flex-direction: row;
-    align-items: center;
-    justify-content: space-between;
-}
-
-.navPiece {
-    display: flex;
-    gap: 10px;
-}
 
 /* form */
 
+.page {
+    padding: 0;
+    margin: 0;
+}
+
 .form {
-    display: grid;
-    grid-template-columns: auto 200px;
+    display: flex;
+    flex-direction: column;
     gap: 8px 10px;
-    align-items: center;
     justify-content: left;
+}
+
+.navigationSection {
+    width: 200px;
+    height: 500px;
+}
+
+.mainContent {
+    width: 100%;
 }
 
 /* task section */
 .taskContainer {
     display: flex;
     flex-direction: row;
-    overflow-x: scroll;
-    scrollbar-width: thin;
     gap: 20px;
+    background-color: blue;
 }
 
-.tileContainer {
+.listContainer {
+    padding: 5px;
     display: flex;
+    background-color: red;
     flex-direction: column;
-    gap: 30px;
+    gap: 10px;
     width: 225px;
     align-items: center;
 }
@@ -75,24 +71,25 @@ div {
     display: flex;
     flex-direction: row;
     align-items: center;
-    justify-content: space-between;
+    background-color: yellow;
     border: 2px solid var(--main-color-accent);
     border-radius: 3px;
+}
+
+.tileContainer {
+    background-color: purple;
     padding: 5px;
 }
 
-.taskHeader * {
-    margin: 0;
+.listHeader {
+    background-color: orange;
+    align-items: center;
+    display: flex;
+    flex-direction: column;
+    width: 100%;
 }
 
 /* global */
-
-.listHeader {
-    height: min-content;
-    display: flex;
-    flex-direction: column;
-    gap: 5px;
-}
 
 body {
     font: 14px Arial, sans-serif;
@@ -123,32 +120,14 @@ body {
 .task {
     border: 2px solid black;
     position: relative;
-    border-radius: 4px;
-    line-height: 1;
     padding: 5px;
-
+    background-color: green;
     transition: all 0.2s ease-in-out;
 }
 
 .taskBody {
     padding-top: 5px;
     padding-bottom: 5px;
-}
-
-.taskBody > p {
-    margin-top: 5px;
-    margin-bottom: 5px;
-}
-
-.task * {
-    margin: 0;
-}
-
-.horizontal-line {
-    width: 5px;
-    height: 100%px;
-    border-right: 2px solid black;
-    margin-top: 5px;
 }
 
 .completed {

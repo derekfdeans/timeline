@@ -1,4 +1,4 @@
-import {generateListHTML, generateSubtaskHTML, generateTaskHTML, generateTopPiece} from "./ui.js";
+import {generateListBlock, generateListHTML} from "./ui.js";
 
 export function displayTaskLists(container) {
     fetch('/get-tasks', {
@@ -9,13 +9,7 @@ export function displayTaskLists(container) {
             container.textContent = "";
             container.classList.add("taskContainer");
 
-            for (let list of data) {
-                container.append(generateListHTML(list));
-
-                let hrElement = document.createElement('div');
-                hrElement.classList.add("horizontal-line");
-                container.append(hrElement);
-            }
+            generateListBlock(container, data);
         })
         .catch(error => console.log(error));
 }
@@ -24,12 +18,13 @@ export function wireElements(container) {
     wireCompleteButton(container);
     wireRemoveButton(container);
     wireAddNextButton(container);
-    wireGlobalTaskForm(container);
     wireAddSubtaskButton(container);
     wireCompleteSubtaskButton(container);
-    wireDarkModeButton();
 }
 
+export function wireForm(container) {
+    wireGlobalTaskForm(container);
+}
 
 // work out with flask/database
 function wireDarkModeButton() {
@@ -92,7 +87,6 @@ function wireGlobalTaskForm(container) {
                 console.log(data)
 
                 addEventForm.reset();
-                displayTaskLists(container);
             })
             .catch(error => console.log(error));
 

@@ -14,7 +14,7 @@ If you want a practical refactor path, do it in this order:
 
 export function generateListHTML(list) {
     let listSection = document.createElement("div");
-    listSection.classList.add("tileContainer");
+    listSection.classList.add("listContainer");
 
     let header = generateTopPiece(list);
     header.classList.add("listHeader");
@@ -44,6 +44,8 @@ export function generateSubtaskBlock(task) {
 
 export function generateTaskBlock(task) {
     let taskWrapper = document.createElement("div");
+    taskWrapper.classList.add('tileContainer');
+
 
     let taskTile = document.createElement("div");
     taskTile.append(generateTaskHTML(task));
@@ -143,14 +145,12 @@ export function generateFormPiece(container) {
 
     formContainer.append(form);
 
-
-
     container.append(formContainer);
 }
 
 export function generateTopPiece(list) {
     let listHeader = document.createElement("div");
-    listHeader.classList.add('taskHeader');
+    listHeader.classList.add('listHeader');
 
     // TODO finish completed %
     let completedNote = document.createElement("p");
@@ -168,15 +168,6 @@ export function generateTopPiece(list) {
     return listHeader;
 }
 
-export function setupPageHTML(root) {
-    root.classList.add('container');
-
-    generateHeaderPiece(root);
-    generateMiddleHTML(root);
-    generateFormPiece(root);
-
-}
-
 export function generateTaskHTML(task) {
     let taskContainer = document.createElement("div");
 
@@ -189,7 +180,7 @@ export function generateTaskHTML(task) {
     let headerSection = document.createElement("div");
     headerSection.classList.add("taskHeader");
 
-    let taskHeader = document.createElement("h1");
+    let taskHeader = document.createElement("p");
     taskHeader.textContent = task.name;
     headerSection.appendChild(taskHeader);
 
@@ -252,55 +243,56 @@ export function generateSubtaskHTML(subtask) {
     return subtaskButton;
 }
 
+export function generateListBlock(container, data) {
+    for (let list of data) {
+        container.append(generateListHTML(list));
+    }
+}
+
 
 export function generatePage(root) {
     let page = document.createElement("div");
     page.classList.add('page');
 
-    let navigationSection = document.createElement("div");
-
-    let titleContainer = document.createElement("div");
-    let pageTitle = document.createElement("p");
-    pageTitle.classList.add('pageTitle');
-    pageTitle.textContent = 'Timeline';
-    titleContainer.appendChild(pageTitle);
-
-    let directoryContainer = document.createElement("div");
-    directoryContainer.classList.add('directoryContainer');
-
-    let loginContainer = document.createElement("div");
-    loginContainer.classList.add('loginContainer');
-
-    navigationSection.appendChild(titleContainer);
-    navigationSection.appendChild(directoryContainer);
-    navigationSection.append(loginContainer);
+    function generateNavigation() {
+        let navigationSection = document.createElement("div");
+        navigationSection.id = 'navContent';
+        navigationSection.classList.add('navigationSection');
 
 
+        let titleContainer = document.createElement("div");
+        let pageTitle = document.createElement("p");
+        pageTitle.classList.add('pageTitle');
+        pageTitle.textContent = 'Timeline';
+        titleContainer.appendChild(pageTitle);
 
-    let mainContent = document.createElement("div");
-    mainContent.classList.add('mainContent');
+        let directoryContainer = document.createElement("div");
+        directoryContainer.classList.add('directoryContainer');
+        directoryContainer.id = 'directoryContainer';
 
-    let taskSection = document.createElement("div");
-    let listContainer = document.createElement("div");
+        let loginContainer = document.createElement("div");
+        loginContainer.classList.add('loginContainer');
 
-    let headerTile = document.createElement("div");
-    headerTile.textContent = "header"
+        navigationSection.appendChild(titleContainer);
+        navigationSection.appendChild(directoryContainer);
+        navigationSection.append(loginContainer);
+        return navigationSection;
+    }
+    let navigationSection = generateNavigation();
 
-    let taskContainer = document.createElement("div");
+    function generateMainContent() {
+        let mainContent = document.createElement("div");
+        mainContent.id = 'mainContent';
+        mainContent.classList.add('mainContent');
 
-    let taskTile = document.createElement("div");
-    taskTile.textContent = "task"
-    let subtaskSubtile = document.createElement("div");
-    subtaskSubtile.textContent = "subtask"
+        let listHolder = document.createElement('div');
+        listHolder.id = 'listHolder';
 
-    taskContainer.append(taskTile, subtaskSubtile);
+        mainContent.append(listHolder);
 
-    let addNextTile = document.createElement("div");
-    addNextTile.textContent = "add next"
-
-    listContainer.append(headerTile, taskTile, addNextTile);
-    taskSection.append(listContainer);
-    mainContent.appendChild(taskSection);
+        return mainContent;
+    }
+    let mainContent = generateMainContent();
 
     page.append(navigationSection, mainContent);
     root.append(page);

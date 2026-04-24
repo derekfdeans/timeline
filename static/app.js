@@ -30,17 +30,23 @@ REFACTOR.
 
 
 
-import {setupPageHTML, generatePage} from "./ui.js"
-import {wireElements, displayTaskLists} from "./events.js"
+import {generatePage, generateFormPiece} from "./ui.js"
+import {wireElements, displayTaskLists, wireForm} from "./events.js"
 
 function setup() {
     const root = document.querySelector("body");
     generatePage(root);
 
-    const container = document.getElementById('listHolder');
-    wireElements(container);
+    const mainContainer = document.getElementById('mainContent');
+    const navContainer = document.getElementById('directoryContainer');
 
-    displayTaskLists(container);
+    generateFormPiece(navContainer);
+    wireForm(navContainer);
+
+    let listHolder = document.getElementById('listHolder');
+    displayTaskLists(listHolder);
+    wireElements(mainContainer);
+
 }
 
 // run when document is loaded! more complicated than defer
