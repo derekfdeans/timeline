@@ -1,5 +1,3 @@
-import {generateListBlock, generateListHTML} from "./ui.js";
-
 export function wireButtons(container) {
     wireCompleteButton(container);
     wireRemoveButton(container);
@@ -13,48 +11,48 @@ export function wireForm(container) {
 }
 
 // work out with flask/database
-function wireDarkModeButton() {
-    let button = document.getElementById("darkModeButton");
-    button.addEventListener("click", function () {
-        let bodySection = document.querySelector("body");
-        let darkModeSetting = JSON.parse(localStorage.getItem('darkMode'));
-
-        if (darkModeSetting === true) {
-            bodySection.classList.remove("darkMode");
-            bodySection.classList.add("lightMode");
-            darkModeSetting = false;
-        } else if (darkModeSetting === false) {
-            bodySection.classList.remove("lightMode");
-            bodySection.classList.add("darkMode");
-            darkModeSetting = true;
-        }
-    })
-}
-
-// rewrite with flask - missing functionality components
-function wireEditTaskClickEvent(container) {
-    container.addEventListener("click", function (event) {
-        if (event.target.tagName === "DIV" && event.target.dataset.type === "task") {
-
-            let taskId = event.target.dataset.id;
-            let newDescription = prompt("new description?");
-
-            if (newDescription === null || newDescription === "") {
-                return;
-            }
-
-            let currentTask = JSON.parse(localStorage.getItem(taskId));
-            currentTask.description = newDescription;
-
-            localStorage.setItem(taskId, JSON.stringify(currentTask));
-
-            displayTaskLists(container);
-        }
-    })
-}
+// function wireDarkModeButton() {
+//     let button = document.getElementById("darkModeButton");
+//     button.addEventListener("click", function () {
+//         let bodySection = document.querySelector("body");
+//         let darkModeSetting = JSON.parse(localStorage.getItem('darkMode'));
+//
+//         if (darkModeSetting === true) {
+//             bodySection.classList.remove("darkMode");
+//             bodySection.classList.add("lightMode");
+//             darkModeSetting = false;
+//         } else if (darkModeSetting === false) {
+//             bodySection.classList.remove("lightMode");
+//             bodySection.classList.add("darkMode");
+//             darkModeSetting = true;
+//         }
+//     })
+// }
+//
+// // rewrite with flask - missing functionality components
+// function wireEditTaskClickEvent(container) {
+//     container.addEventListener("click", function (event) {
+//         if (event.target.tagName === "DIV" && event.target.dataset.type === "task") {
+//
+//             let taskId = event.target.dataset.id;
+//             let newDescription = prompt("new description?");
+//
+//             if (newDescription === null || newDescription === "") {
+//                 return;
+//             }
+//
+//             let currentTask = JSON.parse(localStorage.getItem(taskId));
+//             currentTask.description = newDescription;
+//
+//             localStorage.setItem(taskId, JSON.stringify(currentTask));
+//
+//             displayTaskLists(container);
+//         }
+//     })
+// }
 
 // FORMS
-function wireGlobalTaskForm(container) {
+function wireGlobalTaskForm() {
     const addEventForm = document.getElementById("taskAdder");
     addEventForm.addEventListener("submit", function (task) {
         task.preventDefault();

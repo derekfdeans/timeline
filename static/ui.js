@@ -1,19 +1,3 @@
-/*
-If you want a practical refactor path, do it in this order:
-
-1.Add generateListHTML(list) in ui.js. It should create the section, append the top piece, loop tasks, and return the whole list DOM node.
-
-2.Add generateTaskBlock(task) in ui.js. It should create the wrapper div, append the task card, append the subtask holder, and return it.
-
-3.Shrink displayTaskLists() so it only:
-    ◦fetches
-    ◦clears container
-    ◦loops data
-    ◦appends generateListHTML(list)
- */
-
-import {wireForm} from "./events.js";
-
 export function generateListHTML(list) {
     let listSection = document.createElement("div");
     listSection.classList.add("listContainer");
@@ -59,47 +43,6 @@ export function generateTaskBlock(task) {
     }
 
     return taskWrapper;
-}
-
-export function generateHeaderPiece(container) {
-    let headerPiece = document.createElement("div");
-    headerPiece.classList.add("headerPiece");
-    headerPiece.classList.add("mainSection");
-    headerPiece.id = 'headerPiece';
-
-    let leftSideNav = document.createElement("div");
-    let headerText = document.createElement("h1");
-    headerText.textContent = "your tasks";
-    leftSideNav.appendChild(headerText);
-    headerPiece.appendChild(leftSideNav);
-
-    let navPiece = document.createElement("div");
-    navPiece.classList.add("navPiece");
-
-    let darkModeButton = document.createElement("button");
-    darkModeButton.id = "darkModeButton";
-    darkModeButton.textContent = "dark mode";
-
-    darkModeButton.classList.add("button");
-    navPiece.appendChild(darkModeButton);
-
-    let logInButton = document.createElement("button");
-    logInButton.textContent = "log in";
-    logInButton.id = 'logInButton';
-    logInButton.classList.add("button");
-    navPiece.appendChild(logInButton);
-
-    headerPiece.appendChild(navPiece);
-
-    container.appendChild(headerPiece);
-}
-
-export function generateMiddleHTML(container) {
-    let middlePiece = document.createElement("div");
-    middlePiece.id = "listHolder";
-    middlePiece.classList.add("mainSection");
-
-    container.appendChild(middlePiece);
 }
 
 export function generateFormPiece(container) {
