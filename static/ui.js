@@ -1,3 +1,5 @@
+import {wireForm} from "./events.js";
+
 export function generateListHTML(list) {
     let listSection = document.createElement("div");
     listSection.classList.add("listContainer");
@@ -54,39 +56,23 @@ export function generateFormPiece(container) {
     form.id = "taskAdder";
     form.classList.add("form");
 
-
     let nameLabel = document.createElement("label");
-    nameLabel.textContent = "new category task: ";
-    nameLabel.setAttribute("for", "taskName");
+    nameLabel.textContent = "new list: ";
+    nameLabel.setAttribute("for", "listName");
 
     let nameInput = document.createElement("input");
     nameInput.type = "text";
-    nameInput.id = "taskName";
-    nameInput.name = "taskName";
+    nameInput.id = "listName";
+    nameInput.name = "listName";
 
     form.append(nameLabel, nameInput);
-
-
-    let descriptionLabel = document.createElement("label");
-    descriptionLabel.textContent = "description: ";
-    descriptionLabel.setAttribute("for", "taskDescription");
-
-    let descriptionInput = document.createElement("input");
-    descriptionInput.type = "text";
-    descriptionInput.id = "taskDescription";
-    descriptionInput.name = "taskDescription";
-
-    form.append(descriptionLabel, descriptionInput);
-
 
     let submitButton = document.createElement("input");
     submitButton.type = "submit";
     submitButton.textContent = "add task";
 
     form.append(submitButton);
-
     formContainer.append(form);
-
     container.append(formContainer);
 }
 
@@ -216,7 +202,6 @@ function generateNavigation() {
 function generateSidebarHeader(sidebarHeader) {
     let header = document.createElement("h1");
     header.textContent = "timeline";
-
     sidebarHeader.append(header);
 }
 
@@ -229,7 +214,9 @@ export function getDataAndRender() {
             // sidebar piece
             let sidebarList = document.getElementById('sidebar-list');
             sidebarList.textContent = '';
-            console.log(typeof data);
+            generateFormPiece(sidebarList);
+            wireForm(sidebarList);
+
             generateSidebarList(sidebarList, data);
 
             // main content piece

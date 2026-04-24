@@ -1,3 +1,5 @@
+import {getDataAndRender} from "./ui.js";
+
 export function wireButtons(container) {
     wireCompleteButton(container);
     wireRemoveButton(container);
@@ -69,11 +71,9 @@ function wireGlobalTaskForm() {
             .then(response => response.json())
             .then(data => {
                 console.log(data)
-
                 addEventForm.reset();
             })
             .catch(error => console.log(error));
-
     });
 }
 
@@ -98,7 +98,8 @@ function wireAddSubtaskButton(container) {
             })
                 .then(response => response.json())
                 .then(data => {
-                    console.log(data)
+                    console.log(data);
+                    getDataAndRender();
                 })
                 .catch(error => console.log(error));
         }
@@ -129,6 +130,7 @@ function wireAddNextButton(container) {
                 .then(response => response.json())
                 .then(data => {
                     console.log(data);
+                    getDataAndRender();
                 })
                 .catch(error => console.log(error));
         }
@@ -150,6 +152,7 @@ function wireCompleteButton(container) {
             })
                 .then(response => response.json())
                 .then(data => {
+                    getDataAndRender();
                     console.log(data);
                 })
                 .catch(error => console.log(error));
@@ -172,7 +175,8 @@ function wireRemoveButton(container) {
             })
                 .then(response => response.json())
                 .then(data => {
-                    console.log(data)
+                    console.log(data);
+                    getDataAndRender();
                 })
                 .catch(error => console.log(error));
         }
@@ -194,6 +198,7 @@ function wireCompleteSubtaskButton(container) {
                 .then(response => response.json())
                 .then(data => {
                     console.log(data);
+                    getDataAndRender();
                 })
                 .catch(error => console.log(error));
         }

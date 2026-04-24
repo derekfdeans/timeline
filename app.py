@@ -1,4 +1,5 @@
 # remember flask run --debug! auto reloads
+# venv\Scripts\activate to enter venv
 
 import datetime
 import uuid
@@ -76,12 +77,14 @@ class BaseListHeader(database.Model):
     __tablename__ = 'list'
 
     id: Mapped[str] = mapped_column(primary_key=True, default=lambda: str(uuid.uuid4()))
+    name: Mapped[str] = mapped_column()
     date: Mapped[datetime.date] = mapped_column(Date, default=datetime.date.today)
     tasks: Mapped[list['BaseTask']] = relationship()
 
     def to_dict(self):
         return {
             'id': self.id,
+            'name': self.name,
             'date': self.date,
             'tasks': [task.to_dict() for task in self.tasks],
         }
@@ -100,18 +103,15 @@ def home():
 def add_task():
     form_data = request.get_json()
 
-    name = form_data.get('taskName')
-    description = form_data.get('taskDescription')
+    name = form_data.get('listName')
 
     # new database way
-    new_list = BaseListHeader()
-    new_task = BaseTask(name=name, description=description)
-    new_list.tasks.append(new_task)
+    new_list = BaseListHeader(name=name)
 
     database.session.add(new_list)
     database.session.commit()
 
-    return jsonify({"response": "added task"})
+    return jsonify({"response": "added list"})
 
 
 @app.route('/get-tasks', methods=['GET'])

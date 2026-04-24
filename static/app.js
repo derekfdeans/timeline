@@ -35,7 +35,7 @@ function setup() {
     const root = document.querySelector("body");
     generatePage(root);
 
-    const navContent = document.getElementById('nav-content');
+    const navContent = document.getElementById('sidebar-list');
     generateFormPiece(navContent);
     wireForm(navContent);
 
