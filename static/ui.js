@@ -1,11 +1,39 @@
 import {wireForm} from "./events.js";
 
+export function getDataAndRender() {
+    fetch('/get-tasks', {
+        method: 'GET',
+    })
+        .then(response => response.json())
+        .then(data => {
+            // sidebar piece
+            let sidebarList = document.getElementById('sidebar-list');
+            sidebarList.textContent = '';
+            generateFormPiece(sidebarList);
+            wireForm(sidebarList);
+
+            generateSidebarList(sidebarList, data);
+
+            // main content piece
+            let mainSection = document.getElementById('content-body');
+            mainSection.textContent = '';
+            generateListBlock(mainSection, data);
+        })
+        .catch(error => console.log(error));
+}
+
+
+export function generateListBlock(container, data) {
+    for (let list of data) {
+        container.append(generateListHTML(list));
+    }
+}
+
 export function generateListHTML(list) {
     let listSection = document.createElement("div");
-    listSection.classList.add("listContainer");
+    listSection.classList.add("list-container");
 
     let header = generateTopPiece(list);
-    header.classList.add("listHeader");
     listSection.append(header);
 
     for (let task of list.tasks) {
@@ -15,70 +43,14 @@ export function generateListHTML(list) {
     return listSection;
 }
 
-export function generateSubtaskBlock(task) {
-    let subtaskContainer = document.createElement("div");
-    subtaskContainer.classList.add("subtaskContainer");
-    let subtaskHeader = document.createElement('p');
-    subtaskHeader.classList.add("subtaskHeader");
-    subtaskHeader.textContent = 'subtasks: '
-    subtaskContainer.append(subtaskHeader);
-
-    for (let subtask of task.subtasks) {
-        subtaskContainer.append(generateSubtaskHTML(subtask));
-    }
-
-    return subtaskContainer;
-}
-
-export function generateTaskBlock(task) {
-    let taskWrapper = document.createElement("div");
-    taskWrapper.classList.add('tileContainer');
-
-
-    let taskTile = document.createElement("div");
-    taskTile.append(generateTaskHTML(task));
-    taskWrapper.append(taskTile);
-
-    if (task.subtasks.length !== 0) {
-        let subtaskContainer = generateSubtaskBlock(task);
-        taskWrapper.append(subtaskContainer);
-    }
-
-    return taskWrapper;
-}
-
-export function generateFormPiece(container) {
-    let formContainer = document.createElement("div");
-    formContainer.id = "formContainer";
-    formContainer.classList.add('mainSection')
-
-    let form = document.createElement("form");
-    form.id = "taskAdder";
-    form.classList.add("form");
-
-    let nameLabel = document.createElement("label");
-    nameLabel.textContent = "new list: ";
-    nameLabel.setAttribute("for", "listName");
-
-    let nameInput = document.createElement("input");
-    nameInput.type = "text";
-    nameInput.id = "listName";
-    nameInput.name = "listName";
-
-    form.append(nameLabel, nameInput);
-
-    let submitButton = document.createElement("input");
-    submitButton.type = "submit";
-    submitButton.textContent = "add task";
-
-    form.append(submitButton);
-    formContainer.append(form);
-    container.append(formContainer);
-}
-
 export function generateTopPiece(list) {
     let listHeader = document.createElement("div");
-    listHeader.classList.add('listHeader');
+    listHeader.classList.add('list-header-tile');
+
+    let header = document.createElement("p");
+    header.textContent = list.name;
+    header.classList.add('list-header-text');
+    listHeader.append(header);
 
     // TODO finish completed %
     let completedNote = document.createElement("p");
@@ -96,17 +68,34 @@ export function generateTopPiece(list) {
     return listHeader;
 }
 
+export function generateTaskBlock(task) {
+    let taskWrapper = document.createElement("div");
+    taskWrapper.classList.add('task-container');
+
+
+    let taskTile = document.createElement("div");
+    taskTile.append(generateTaskHTML(task));
+    taskWrapper.append(taskTile);
+
+    if (task.subtasks.length !== 0) {
+        let subtaskContainer = generateSubtaskBlock(task);
+        taskWrapper.append(subtaskContainer);
+    }
+
+    return taskWrapper;
+}
+
 export function generateTaskHTML(task) {
     let taskContainer = document.createElement("div");
 
-    taskContainer.classList.add("task");
+    taskContainer.classList.add("task-main-tile");
     taskContainer.dataset.type = "task";
     taskContainer.dataset.id = task.id;
 
     if (task.completed) taskContainer.classList.add("completed");
 
     let headerSection = document.createElement("div");
-    headerSection.classList.add("taskHeader");
+    headerSection.classList.add("task-tile-header");
 
     let taskHeader = document.createElement("p");
     taskHeader.textContent = task.name;
@@ -119,7 +108,7 @@ export function generateTaskHTML(task) {
 
 
     let taskBody = document.createElement("div");
-    taskBody.classList.add("taskBody");
+    taskBody.classList.add("task-tile-body");
 
     let dateTime = document.createElement("p");
     // patch up "created x minutes ago" later
@@ -133,27 +122,27 @@ export function generateTaskHTML(task) {
 
 
     let buttonSection = document.createElement("div");
-    buttonSection.classList.add("buttonSection");
+    buttonSection.classList.add("task-tile-button-container");
 
     let removeTaskButton = document.createElement("button");
     removeTaskButton.dataset.id = task.id
     removeTaskButton.dataset.action = "remove";
     removeTaskButton.textContent = "remove";
-    removeTaskButton.classList.add("button");
+    removeTaskButton.classList.add("task-tile-button", "btn-danger");
     buttonSection.appendChild(removeTaskButton);
 
     let completeTaskButton = document.createElement("button");
     completeTaskButton.dataset.id = task.id
     completeTaskButton.dataset.action = "complete";
     completeTaskButton.textContent = "complete";
-    completeTaskButton.classList.add("button");
+    completeTaskButton.classList.add("task-tile-button", "btn-positive");
     buttonSection.appendChild(completeTaskButton);
 
     let newSubtaskButton = document.createElement("button");
     newSubtaskButton.dataset.id = task.id
     newSubtaskButton.dataset.action = "addSubtask";
     newSubtaskButton.textContent = "subtask";
-    newSubtaskButton.classList.add("button");
+    newSubtaskButton.classList.add("task-tile-button", "btn-secondary");
     buttonSection.appendChild(newSubtaskButton);
 
     taskContainer.append(buttonSection);
@@ -162,21 +151,41 @@ export function generateTaskHTML(task) {
     return taskContainer;
 }
 
+export function generateSubtaskBlock(task) {
+    let subtaskContainer = document.createElement("div");
+    subtaskContainer.classList.add("task-subtask-container");
+    let subtaskHeader = document.createElement('p');
+    subtaskHeader.classList.add("task-subtask-header");
+    subtaskHeader.textContent = 'subtasks: '
+    subtaskContainer.append(subtaskHeader);
+
+    for (let subtask of task.subtasks) {
+        subtaskContainer.append(generateSubtaskHTML(subtask));
+    }
+
+    return subtaskContainer;
+}
+
 export function generateSubtaskHTML(subtask) {
     let subtaskButton = document.createElement('button');
     subtaskButton.dataset.id = subtask.id;
     subtaskButton.dataset.action = "completeSubtask";
-    subtaskButton.classList.add("subtask");
+    subtaskButton.classList.add("task-subtask-tile");
     subtaskButton.textContent = subtask.content;
     return subtaskButton;
 }
 
-export function generateListBlock(container, data) {
-    for (let list of data) {
-        container.append(generateListHTML(list));
-    }
-}
 
+export function generatePage(root) {
+    let page = document.createElement("div");
+    page.classList.add('page');
+
+    let navigationSection = generateNavigation();
+    let mainContent = generateMainContent();
+
+    page.append(navigationSection, mainContent);
+    root.append(page);
+}
 
 function generateNavigation() {
     let navSidebar = document.createElement("div");
@@ -188,7 +197,7 @@ function generateNavigation() {
     generateSidebarHeader(sidebarHeader);
 
     let sidebarList = document.createElement("div");
-    sidebarList.classList.add('sidebar-list');
+    sidebarList.classList.add('sidebar-list-container');
     sidebarList.id = 'sidebar-list';
 
     let sidebarFooter = document.createElement("div");
@@ -202,28 +211,8 @@ function generateNavigation() {
 function generateSidebarHeader(sidebarHeader) {
     let header = document.createElement("h1");
     header.textContent = "timeline";
+    header.classList.add('sidebar-header-text');
     sidebarHeader.append(header);
-}
-
-export function getDataAndRender() {
-    fetch('/get-tasks', {
-        method: 'GET',
-    })
-        .then(response => response.json())
-        .then(data => {
-            // sidebar piece
-            let sidebarList = document.getElementById('sidebar-list');
-            sidebarList.textContent = '';
-            generateFormPiece(sidebarList);
-            wireForm(sidebarList);
-
-            generateSidebarList(sidebarList, data);
-
-            // main content piece
-            let mainSection = document.getElementById('content-body');
-            generateListBlock(mainSection, data);
-        })
-        .catch(error => console.log(error));
 }
 
 function generateSidebarList(sidebarList, data) {
@@ -234,20 +223,26 @@ function generateSidebarList(sidebarList, data) {
 
 function generateSidebarListPiece(list) {
     let listHolder = document.createElement("div");
+    listHolder.classList.add('sidebar-list');
 
     let listHeader = document.createElement("div");
+    listHeader.classList.add('sidebar-list-header');
+
     let listName = document.createElement("p");
     listName.textContent = list.name;
+
     let listCompleted = document.createElement("p");
-    listCompleted.textContent = "% completed";
+    listCompleted.textContent = "% done";
 
     listHeader.append(listName, listCompleted);
     listHolder.append(listHeader);
 
     let bulletedList = document.createElement('div');
+    bulletedList.classList.add('sidebar-bulleted-list');
 
     for (let task of list.tasks) {
         let listElement = document.createElement("div");
+        listElement.classList.add('sidebar-list-element');
 
         let taskText = document.createElement("p");
         taskText.textContent = task.name;
@@ -283,23 +278,47 @@ function generateMainContent() {
     mainContent.id = 'main-content';
 
     let contentHeader = document.createElement("div");
-    contentHeader.classList.add('content-header');
+    contentHeader.classList.add('main-content-header-container');
+
+    let headerText = document.createElement("h1");
+    headerText.textContent = 'all tasks';
+    contentHeader.append(headerText);
 
     let contentBody = document.createElement('div');
-    contentBody.classList.add('content-body');
+    contentBody.classList.add('main-content-body');
     contentBody.id = 'content-body';
 
     mainContent.append(contentHeader, contentBody);
     return mainContent;
 }
 
-export function generatePage(root) {
-    let page = document.createElement("div");
-    page.classList.add('page');
 
-    let navigationSection = generateNavigation();
-    let mainContent = generateMainContent();
+export function generateFormPiece(container) {
+    let formContainer = document.createElement("div");
+    formContainer.id = "formContainer";
+    formContainer.classList.add('form-section');
 
-    page.append(navigationSection, mainContent);
-    root.append(page);
+    let form = document.createElement("form");
+    form.id = "taskAdder";
+    form.classList.add("form");
+
+    let nameLabel = document.createElement("label");
+    nameLabel.textContent = "new list: ";
+    nameLabel.setAttribute("for", "listName");
+
+    let nameInput = document.createElement("input");
+    nameInput.classList.add('task-tile-button');
+    nameInput.type = "text";
+    nameInput.id = "listName";
+    nameInput.name = "listName";
+
+    form.append(nameLabel, nameInput);
+
+    let submitButton = document.createElement("input");
+    submitButton.type = "submit";
+    submitButton.textContent = "add task";
+
+    form.append(submitButton);
+    formContainer.append(form);
+    container.append(formContainer);
 }
