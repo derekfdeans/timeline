@@ -1,4 +1,4 @@
-import {generateListFormDialog, generateNewTaskDialog, getDataAndRender} from "./ui.js";
+import {generateListFormDialog, generateNewSubtaskDialog, generateNewTaskDialog, getDataAndRender} from "./ui.js";
 
 export function wireButtons(container) {
     wireCompleteButton(container);
@@ -49,42 +49,7 @@ export function wireButtons(container) {
 //     })
 // }
 
-// FORMS
-/*
-export function generateListFormDialog() {
-    let dialog = document.createElement('dialog');
-    dialog.classList.add('dialog');
-
-    let form = document.createElement("form");
-    form.id = "taskAdder";
-    form.classList.add("form");
-
-    let nameLabel = document.createElement("label");
-    nameLabel.textContent = "new list: ";
-    nameLabel.setAttribute("for", "listName");
-
-    let nameInput = document.createElement("input");
-    nameInput.classList.add('task-tile-button');
-    nameInput.type = "text";
-    nameInput.id = "listName";
-    nameInput.name = "listName";
-
-    form.append(nameLabel, nameInput);
-
-    let submitButton = document.createElement("input");
-    submitButton.type = "submit";
-    submitButton.formMethod = 'dialog';
-    submitButton.textContent = "add list";
-
-    form.append(submitButton);
-
-    dialog.append(form);
-    return dialog;
-}
-
- */
-
-// move to ui
+// "create list" dialog
 function generateFormDialog() {
     // generate the modal on page
     let dialog = generateListFormDialog();
@@ -135,7 +100,7 @@ export function wireGlobalTaskForm() {
 }
 
 
-// move to ui
+// "add next task" dialog"
 function generateTaskDialog(taskId) {
     let dialog = generateNewTaskDialog(taskId);
     document.body.appendChild(dialog);
@@ -195,36 +160,63 @@ function wireAddNextDialog(dialog) {
 }
 
 
-// BUTTONS
+// "add subtask" dialog
+function generateSubtaskDialog(taskId) {
+    let dialog = generateNewSubtaskDialog(taskId);
+    document.body.appendChild(dialog);
+    dialog.showModal();
+    return dialog;
+}
+
+function wireSubtaskDialog(dialog) {
+    let submitButton = document.getElementById(`submit-button-${dialog.dataset.id}`);
+    let nameInput = document.getElementById(`new-name-${dialog.dataset.id}`);
+
+    submitButton.addEventListener('click', () => {
+        dialog.close(JSON.stringify({
+            'taskId': dialog.dataset.id,
+            'name': nameInput.value,
+        }));
+    })
+
+    dialog.addEventListener("close", function () {
+        if (dialog.returnValue === "") {
+            dialog.remove();
+            return;
+        }
+
+        let dataObject = JSON.parse(dialog.returnValue);
+        fetch("/add-subtask", {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                'newName': dataObject.name,
+                'taskId': dataObject.taskId,
+            }),
+        })
+            .then(response => response.json())
+            .then(data => {
+                console.log(data);
+                dialog.remove();
+                getDataAndRender();
+            })
+            .catch(error => console.log(error));
+    })
+}
+
 function wireAddSubtaskButton(container) {
     container.addEventListener("click", function (event) {
         if (event.target.tagName === "BUTTON" && event.target.dataset.action === "addSubtask") {
-            let title = prompt("new task name?");
-            if (title === null || title === "") {
-                return;
-            }
-
-            fetch("/add-subtask", {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({
-                    'newName': title,
-                    'taskId': event.target.dataset.id,
-                }),
-            })
-                .then(response => response.json())
-                .then(data => {
-                    console.log(data);
-                    getDataAndRender();
-                })
-                .catch(error => console.log(error));
+            let dialog = generateSubtaskDialog(event.target.dataset.id);
+            wireSubtaskDialog(dialog);
         }
     })
 }
 
 
+// BUTTONS
 function wireCompleteButton(container) {
     container.addEventListener("click", function (event) {
         if (event.target.tagName === "BUTTON" && event.target.dataset.action === "complete") {

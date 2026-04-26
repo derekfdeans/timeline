@@ -101,11 +101,52 @@ export function generateNewTaskDialog(taskId) {
 }
 
 // adding a subtask (or somehow do this inline; have a text field popup and then "enter" converts it to task)
+export function generateNewSubtaskDialog(taskId) {
+    let dialog = document.createElement('dialog');
+    dialog.classList.add('dialog');
+    dialog.id = 'subtask-dialog';
+    dialog.dataset.id = taskId;
 
-// later: editing tasks dialog (click task to edit?)
+    let dialogContainer = document.createElement("div");
+    dialogContainer.classList.add('dialog-holder');
+
+    let dialogHeader = document.createElement("p");
+    dialogHeader.textContent = "create new subtask";
+    dialogHeader.classList.add('dialog-header');
+    dialogContainer.appendChild(dialogHeader);
+
+    let form = document.createElement("form");
+    form.id = "subtask-form";
+    form.classList.add("form");
+
+    let nameInputSection = document.createElement("div");
+    nameInputSection.classList.add('form-input-section');
+
+    let nameLabel = document.createElement("label");
+    nameLabel.textContent = "new subtask: ";
+    nameLabel.setAttribute("for", "new-task-name");
+
+    let nameInput = document.createElement("input");
+    nameInput.type = "text";
+    nameInput.id = `new-name-${taskId}`;
+    form.append(nameLabel, nameInput);
+
+    let submitButton = document.createElement("button");
+    submitButton.type = "submit";
+    submitButton.id = `submit-button-${taskId}`;
+    submitButton.formMethod = 'dialog';
+    submitButton.textContent = 'add new subtask';
+    form.append(submitButton);
+
+    dialogContainer.append(form);
+    dialog.append(dialogContainer);
+    return dialog;
+}
+
+// later: editing tasks  dialog (click task to edit?)
 
 
-
+// rendering lists
 export function getDataAndRender() {
     fetch('/get-tasks', {
         method: 'GET',
@@ -128,6 +169,7 @@ export function getDataAndRender() {
 }
 
 
+// task list functions
 export function generateListBlock(container, data) {
     for (let list of data) {
         container.append(generateListHTML(list));
@@ -281,6 +323,7 @@ export function generateSubtaskHTML(subtask) {
 }
 
 
+// page content functions
 export function generatePage(root) {
     let page = document.createElement("div");
     page.classList.add('page');
