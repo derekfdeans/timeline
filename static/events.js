@@ -182,6 +182,7 @@ function wireSubtaskDialog(dialog) {
     dialog.addEventListener("close", function () {
         if (dialog.returnValue === "") {
             dialog.remove();
+            console.log('no value, canceling');
             return;
         }
 

@@ -7,6 +7,7 @@ export function generateListFormDialog() {
     dialog.id = 'form-dialog';
 
     let dialogHolder = document.createElement('div');
+    dialogHolder.classList.add('dialog-holder');
 
     let dialogHeader = document.createElement("p");
     dialogHeader.textContent = "create new list";
@@ -29,7 +30,7 @@ export function generateListFormDialog() {
 
     form.append(nameLabel, nameInput);
 
-    let submitButton = document.createElement("input");
+    let submitButton = document.createElement("button");
     submitButton.type = "submit";
     submitButton.id = "submitButton";
     submitButton.formMethod = 'dialog';

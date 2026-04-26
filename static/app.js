@@ -11,9 +11,8 @@ cosmetics
     put a class on everything actually; no default styles
 
 logics/features
-    better "add next" system - alerts are old !!! - dialogs
     add edit task system - also use dialogs
-    write a popup window - learn (USE <dialog> HTML)
+        click tiles to edit, click mini-list element in sidebar to edit
     add way to hide/show tasks
     rewrite timing system; add a "due," show when due
     add a "time until due" in days, hours, minutes, etc.
