@@ -36,7 +36,6 @@ body {
     box-sizing: border-box;
 }
 
-
 *:focus-visible {
     outline: var(--accent) 2px solid;
 }
@@ -45,6 +44,19 @@ body {
     display: flex;
     width: 100vw;
     height: 100vh;
+}
+
+.dialog {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+
+    padding: 25px;
+    background-color: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    color: var(--text-primary);
 }
 
 .sidebar {
@@ -85,10 +97,9 @@ body {
     background-color: var(--surface-hover);
 }
 
-.form {
-    display: flex;
-    flex-direction: column;
-    gap: 5px;
+form {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
 }
 
 .sidebar-list-container {

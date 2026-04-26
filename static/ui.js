@@ -1,4 +1,102 @@
-import {wireForm} from "./events.js";
+// new dialogs required
+
+// adding a new project
+import {wireGlobalTaskForm} from "./events.js";
+
+export function generateListFormDialog() {
+    let dialog = document.createElement('dialog');
+    dialog.classList.add('dialog');
+    dialog.id = 'form-dialog';
+
+    let dialogHeader = document.createElement("p");
+    dialogHeader.textContent = "creating new list";
+    dialog.appendChild(dialogHeader);
+
+    let form = document.createElement("form");
+    form.id = "taskAdder";
+    form.classList.add("form");
+
+    let nameLabel = document.createElement("label");
+    nameLabel.textContent = "new list: ";
+    nameLabel.setAttribute("for", "listName");
+
+    let nameInput = document.createElement("input");
+    nameInput.classList.add('task-tile-button');
+    nameInput.type = "text";
+    nameInput.id = "listName";
+    nameInput.name = "listName";
+
+    form.append(nameLabel, nameInput);
+
+    let submitButton = document.createElement("input");
+    submitButton.type = "submit";
+    submitButton.id = "submitButton";
+    submitButton.formMethod = 'dialog';
+    submitButton.textContent = "add list";
+    submitButton.classList.add('button');
+
+    form.append(submitButton);
+
+    dialog.append(form);
+    return dialog;
+}
+
+// adding a new task
+export function generateNewTaskDialog(taskId) {
+    let dialog = document.createElement('dialog');
+    dialog.classList.add('dialog');
+    dialog.id = 'new-task-dialog';
+    dialog.dataset.id = taskId;
+
+    let dialogHeader = document.createElement("p");
+    dialogHeader.textContent = "creating new task";
+    dialog.appendChild(dialogHeader);
+
+    let form = document.createElement("form");
+    form.id = "new-task-form";
+    form.classList.add("form");
+
+    let nameInputSection = document.createElement("div");
+    nameInputSection.classList.add('form-input-section');
+
+    let nameLabel = document.createElement("label");
+    nameLabel.textContent = "new task: ";
+    nameLabel.setAttribute("for", "new-task-name");
+
+    let nameInput = document.createElement("input");
+    nameInput.type = "text";
+    nameInput.id = `new-name-${taskId}`;
+
+    form.append(nameLabel, nameInput);
+
+
+    let descriptionInputSection = document.createElement("div");
+    descriptionInputSection.classList.add('form-input-section');
+
+    let descriptionLabel = document.createElement("label");
+    descriptionLabel.textContent = "description: ";
+    descriptionLabel.setAttribute("for", "new-task-description");
+
+    let descriptionInput = document.createElement("input");
+    descriptionInput.type = "text";
+    descriptionInput.id = `new-description-${taskId}`;
+
+    form.append(descriptionLabel, descriptionInput);
+
+    let submitButton = document.createElement('button');
+    submitButton.type = "submit";
+    submitButton.formMethod = 'dialog';
+    submitButton.textContent = 'add new task';
+    submitButton.id = `submit-button-${taskId}`;
+    form.append(submitButton);
+
+    dialog.append(form);
+    return dialog;
+}
+
+// adding a subtask (or somehow do this inline; have a text field popup and then "enter" converts it to task)
+
+// later: editing tasks
 
 export function getDataAndRender() {
     fetch('/get-tasks', {
@@ -10,8 +108,7 @@ export function getDataAndRender() {
             let sidebarList = document.getElementById('sidebar-list');
             sidebarList.textContent = '';
             generateFormPiece(sidebarList);
-            wireForm(sidebarList);
-
+            wireGlobalTaskForm();
             generateSidebarList(sidebarList, data);
 
             // main content piece
@@ -294,31 +391,8 @@ function generateMainContent() {
 
 
 export function generateFormPiece(container) {
-    let formContainer = document.createElement("div");
-    formContainer.id = "formContainer";
-    formContainer.classList.add('form-section');
-
-    let form = document.createElement("form");
-    form.id = "taskAdder";
-    form.classList.add("form");
-
-    let nameLabel = document.createElement("label");
-    nameLabel.textContent = "new list: ";
-    nameLabel.setAttribute("for", "listName");
-
-    let nameInput = document.createElement("input");
-    nameInput.classList.add('task-tile-button');
-    nameInput.type = "text";
-    nameInput.id = "listName";
-    nameInput.name = "listName";
-
-    form.append(nameLabel, nameInput);
-
-    let submitButton = document.createElement("input");
-    submitButton.type = "submit";
-    submitButton.textContent = "add task";
-
-    form.append(submitButton);
-    formContainer.append(form);
-    container.append(formContainer);
+    let button = document.createElement("button");
+    button.textContent = 'create list';
+    button.id = 'new-list-button';
+    container.append(button);
 }

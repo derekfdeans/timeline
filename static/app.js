@@ -16,8 +16,9 @@ logics/features
     write a popup window - learn (USE <dialog> HTML)
     add way to hide/show tasks
     rewrite timing system; add a "due," show when due
-    add a "time until due" in days, hours, minutes, etc
+    add a "time until due" in days, hours, minutes, etc.
     add login backend support (start basic, no security, then add it lol)
+    delete list button - for me debugging and for "users"
 
     long term:
     more intuitive usage; drag around tasks for order, right click/hold to edit/manage, etc.
@@ -27,9 +28,10 @@ code-side
     clean up all ui code; break apart into functions, find reusables
  */
 
+// main goal for 04-25-2026 - write up dialogues
 
 import {generatePage, generateFormPiece, getDataAndRender} from "./ui.js"
-import {wireButtons, wireForm} from "./events.js"
+import {wireButtons} from "./events.js"
 
 function setup() {
     const root = document.querySelector("body");
@@ -37,7 +39,6 @@ function setup() {
 
     const navContent = document.getElementById('sidebar-list');
     generateFormPiece(navContent);
-    wireForm(navContent);
 
     getDataAndRender();
 
