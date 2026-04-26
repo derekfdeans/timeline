@@ -5,26 +5,26 @@ generally notice:
     what's stopping me from using this?
     what feels missing/distracting?
 
-cosmetic changes: !
-    some colors? give headers different color
-better "add next" system - alerts are old !!!
-    write a popup window?
-a new <div> on top of each task category? still tile style!
+cosmetics
+    write up a phone view - it's obnoxiously small on phone. @media tag
+    rewrite the new list form - buttons are inconsistent
+    put a class on everything actually; no default styles
+
+logics/features
+    better "add next" system - alerts are old !!! - dialogs
+    add edit task system - also use dialogs
+    write a popup window - learn (USE <dialog> HTML)
     add way to hide/show tasks
-add way to edit tasks !!!
-    subpage system? click on task to open task editor? or inline add text boxes for input to the current task <div>
-figure out more fancy timing system: seconds when less than a minute, minutes when less than an hour, hours when less than a day, etc
+    rewrite timing system; add a "due," show when due
+    add a "time until due" in days, hours, minutes, etc
+    add login backend support (start basic, no security, then add it lol)
 
+    long term:
+    more intuitive usage; drag around tasks for order, right click/hold to edit/manage, etc.
+    websockets for immediate updates across all pages - mild rewrite
 
-eventually add cross-device support -> login system !
-    tools:
-        learn authentication - data security
-    when done with server, think about WEBSOCKETS ( live updates, fun )
-
-
-code-side edits: save for end (when features are all added)
-REFACTOR.
-    ensure readability
+code-side
+    clean up all ui code; break apart into functions, find reusables
  */
 
 

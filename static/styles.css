@@ -57,7 +57,7 @@ body {
 }
 
 .sidebar-header {
-    height: 7vh;
+    height: 60px;
     display: flex;
     align-items: center;
     padding: 10px;
@@ -125,6 +125,7 @@ body {
                 flex-direction: row;
                 padding: 2px 2px 2px 10px;
                 font-size: 0.9em;
+                align-items: center;
                 gap: 10px;
                 border-radius: 3px;
                 transition: all ease-in-out 0.2s;
@@ -150,7 +151,7 @@ body {
     flex-direction: row;
     justify-content: space-between;
     align-items: center;
-    height: 7vh;
+    height: 60px;
     padding: 10px;
 }
 
@@ -163,7 +164,7 @@ body {
 }
 
 .main-content-header-container {
-    height: 7vh;
+    height: 60px;
     display: flex;
     align-items: center;
     padding: 10px;

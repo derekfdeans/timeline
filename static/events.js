@@ -110,7 +110,6 @@ function wireAddSubtaskButton(container) {
 function wireAddNextButton(container) {
     container.addEventListener("click", function (event) {
         if (event.target.tagName === "BUTTON" && event.target.dataset.action === "addNext") {
-            // TODO rewrite as a popup window prompt - not alerts
             let title = prompt("new task name?");
             if (title === null || title === "") {
                 return;
