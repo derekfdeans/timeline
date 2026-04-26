@@ -1,16 +1,17 @@
-// new dialogs required
-
-// adding a new project
 import {wireGlobalTaskForm} from "./events.js";
 
+// adding a new project
 export function generateListFormDialog() {
     let dialog = document.createElement('dialog');
     dialog.classList.add('dialog');
     dialog.id = 'form-dialog';
 
+    let dialogHolder = document.createElement('div');
+
     let dialogHeader = document.createElement("p");
-    dialogHeader.textContent = "creating new list";
-    dialog.appendChild(dialogHeader);
+    dialogHeader.textContent = "create new list";
+    dialogHeader.classList.add('dialog-header');
+    dialogHolder.appendChild(dialogHeader);
 
     let form = document.createElement("form");
     form.id = "taskAdder";
@@ -33,11 +34,11 @@ export function generateListFormDialog() {
     submitButton.id = "submitButton";
     submitButton.formMethod = 'dialog';
     submitButton.textContent = "add list";
-    submitButton.classList.add('button');
 
     form.append(submitButton);
 
-    dialog.append(form);
+    dialogHolder.append(form);
+    dialog.append(dialogHolder);
     return dialog;
 }
 
@@ -48,9 +49,13 @@ export function generateNewTaskDialog(taskId) {
     dialog.id = 'new-task-dialog';
     dialog.dataset.id = taskId;
 
+    let dialogContainer = document.createElement("div");
+    dialogContainer.classList.add('dialog-holder');
+
     let dialogHeader = document.createElement("p");
     dialogHeader.textContent = "creating new task";
-    dialog.appendChild(dialogHeader);
+    dialogHeader.classList.add('dialog-header');
+    dialogContainer.appendChild(dialogHeader);
 
     let form = document.createElement("form");
     form.id = "new-task-form";
@@ -90,13 +95,16 @@ export function generateNewTaskDialog(taskId) {
     submitButton.id = `submit-button-${taskId}`;
     form.append(submitButton);
 
-    dialog.append(form);
+    dialogContainer.append(form);
+    dialog.append(dialogContainer);
     return dialog;
 }
 
 // adding a subtask (or somehow do this inline; have a text field popup and then "enter" converts it to task)
 
-// later: editing tasks
+// later: editing tasks dialog (click task to edit?)
+
+
 
 export function getDataAndRender() {
     fetch('/get-tasks', {

@@ -52,11 +52,22 @@ body {
     left: 50%;
     transform: translate(-50%, -50%);
 
-    padding: 25px;
+    padding: 25px 50px;
     background-color: var(--surface);
     border: 1px solid var(--border);
     border-radius: 4px;
     color: var(--text-primary);
+}
+
+.dialog-holder {
+    display: flex;
+    align-items: center;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.dialog-header {
+    font-weight: bold;
 }
 
 .sidebar {
@@ -97,8 +108,9 @@ body {
     background-color: var(--surface-hover);
 }
 
-form {
+.form {
     display: grid;
+    gap: 10px;
     grid-template-columns: 1fr 1fr;
 }
 

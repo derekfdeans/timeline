@@ -103,6 +103,12 @@ function wireListDialog(dialog) {
     })
 
     dialog.addEventListener("close", function () {
+        if (dialog.returnValue === "") {
+            console.log("escaped, canceling");
+            dialog.remove();
+            return;
+        }
+
         fetch("/add-task", {
             method: 'POST',
             headers: {
@@ -160,6 +166,12 @@ function wireAddNextDialog(dialog) {
     });
 
     dialog.addEventListener("close", function () {
+        if (dialog.returnValue === "") {
+            console.log('no value, canceling');
+            dialog.remove();
+            return;
+        }
+
         let dataObject = JSON.parse(dialog.returnValue);
         fetch("/add-next", {
             method: 'POST',
