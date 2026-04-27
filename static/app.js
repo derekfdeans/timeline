@@ -23,13 +23,16 @@ logics/features
     more intuitive usage; drag around tasks for order, right click/hold to edit/manage, etc.
     websockets for immediate updates across all pages - mild rewrite
 
+    efficiency:
+    when loading tasks (/get-tasks), load them into cache so that event functions can read current data immediately, no individual "get" required
+
 code-side
     clean up all ui code; break apart into functions, find reusables
  */
 
 // main goal for 04-25-2026 - write up dialogues
 
-import {generatePage, generateFormPiece, getDataAndRender} from "./ui.js"
+import {generatePage, generateNewListButton, getDataAndRender} from "./ui.js"
 import {wireButtons} from "./events.js"
 
 function setup() {
@@ -37,7 +40,7 @@ function setup() {
     generatePage(root);
 
     const navContent = document.getElementById('sidebar-list');
-    generateFormPiece(navContent);
+    generateNewListButton(navContent);
 
     getDataAndRender();
 

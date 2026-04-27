@@ -1,6 +1,6 @@
 import {wireGlobalTaskForm} from "./events.js";
 
-// adding a new project
+// DIALOGS
 export function generateListFormDialog() {
     let dialog = document.createElement('dialog');
     dialog.classList.add('dialog');
@@ -43,7 +43,6 @@ export function generateListFormDialog() {
     return dialog;
 }
 
-// adding a new task
 export function generateNewTaskDialog(taskId) {
     let dialog = document.createElement('dialog');
     dialog.classList.add('dialog');
@@ -101,7 +100,6 @@ export function generateNewTaskDialog(taskId) {
     return dialog;
 }
 
-// adding a subtask (or somehow do this inline; have a text field popup and then "enter" converts it to task)
 export function generateNewSubtaskDialog(taskId) {
     let dialog = document.createElement('dialog');
     dialog.classList.add('dialog');
@@ -144,8 +142,82 @@ export function generateNewSubtaskDialog(taskId) {
     return dialog;
 }
 
-// later: editing tasks  dialog (click task to edit?)
+async function fetchDataFromTaskId(taskId) {
+    let returnData = await fetch(`/get-task/${taskId}`, {
+        method: 'GET',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+    })
+    return returnData.json();
+}
 
+export async function generateEditTaskDialog(taskId) {
+    let dialog = document.createElement('dialog');
+    console.log('generating dialog');
+    let existingData = await fetchDataFromTaskId(taskId);
+    console.log(`data collected:`);
+    console.log(existingData);
+
+    dialog.classList.add('dialog');
+    dialog.id = 'edit-task-dialog';
+    dialog.dataset.id = taskId;
+
+    let dialogContainer = document.createElement("div");
+    dialogContainer.classList.add('dialog-holder');
+    dialogContainer.id = 'edit-task-dialog-container';
+
+    let dialogHeader = document.createElement("p");
+    dialogHeader.textContent = "edit task";
+    dialogHeader.classList.add('dialog-header');
+    dialogContainer.appendChild(dialogHeader);
+
+    let form = document.createElement("form");
+    form.id = "edit-task-form";
+    form.classList.add("form");
+
+    let nameLabel = document.createElement("label");
+    nameLabel.textContent = "new name: ";
+
+    let nameInput = document.createElement("input");
+    nameInput.type = "text";
+    nameInput.id = `new-name-${taskId}`;
+    nameInput.defaultValue = existingData.name;
+
+    form.append(nameLabel, nameInput);
+
+    let descriptionLabel = document.createElement("label");
+    descriptionLabel.textContent = "new description: ";
+
+    let descriptionInput = document.createElement("input");
+    descriptionInput.type = "text";
+    descriptionInput.id = `new-description-${taskId}`;
+    descriptionInput.defaultValue = existingData.description;
+
+    form.append(descriptionLabel, descriptionInput);
+
+    let completeLabel = document.createElement("label");
+    completeLabel.textContent = "complete: ";
+
+    let completeInput = document.createElement("input");
+    completeInput.type = "checkbox";
+    completeInput.id = `new-complete-${taskId}`;
+    completeInput.checked = existingData.completed;
+
+    form.append(completeLabel, completeInput);
+
+    let submitButton = document.createElement("button");
+    submitButton.type = "submit";
+    submitButton.id = `submit-button-${taskId}`;
+    submitButton.formMethod = 'dialog';
+    submitButton.textContent = 'submit edits';
+
+    form.append(submitButton);
+
+    dialogContainer.append(form);
+    dialog.append(dialogContainer);
+    return dialog;
+}
 
 // rendering lists
 export function getDataAndRender() {
@@ -157,7 +229,7 @@ export function getDataAndRender() {
             // sidebar piece
             let sidebarList = document.getElementById('sidebar-list');
             sidebarList.textContent = '';
-            generateFormPiece(sidebarList);
+            generateNewListButton(sidebarList);
             wireGlobalTaskForm();
             generateSidebarList(sidebarList, data);
 
@@ -170,7 +242,7 @@ export function getDataAndRender() {
 }
 
 
-// task list functions
+// TASK LIST GENERATION
 export function generateListBlock(container, data) {
     for (let list of data) {
         container.append(generateListHTML(list));
@@ -235,7 +307,6 @@ export function generateTaskBlock(task) {
 
 export function generateTaskHTML(task) {
     let taskContainer = document.createElement("div");
-
     taskContainer.classList.add("task-main-tile");
     taskContainer.dataset.type = "task";
     taskContainer.dataset.id = task.id;
@@ -257,10 +328,6 @@ export function generateTaskHTML(task) {
 
     let taskBody = document.createElement("div");
     taskBody.classList.add("task-tile-body");
-
-    let dateTime = document.createElement("p");
-    // patch up "created x minutes ago" later
-    taskBody.appendChild(dateTime);
 
     let taskDescription = document.createElement("p");
     taskDescription.textContent = task.description;
@@ -324,7 +391,7 @@ export function generateSubtaskHTML(subtask) {
 }
 
 
-// page content functions
+// PAGE SETUP GENERATION
 export function generatePage(root) {
     let page = document.createElement("div");
     page.classList.add('page');
@@ -441,8 +508,7 @@ function generateMainContent() {
     return mainContent;
 }
 
-
-export function generateFormPiece(container) {
+export function generateNewListButton(container) {
     let button = document.createElement("button");
     button.textContent = 'create list';
     button.id = 'new-list-button';

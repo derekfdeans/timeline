@@ -1,4 +1,4 @@
-# remember flask run --debug! auto reloads
+# remember flask run --debug! auto reloads on save
 # venv\Scripts\activate to enter venv
 
 import datetime
@@ -11,7 +11,6 @@ from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, relationship
 
 
 class Base(DeclarativeBase):
-    # add metadata if desired later
     pass
 
 
@@ -21,15 +20,6 @@ app = Flask(__name__)
 
 app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///timeline.db"
 database.init_app(app)
-
-'''
-new data system:
-lists
-    task -> task -> task -> task
-            - subtask       - subtask
-            - subtask       - subtask
-    task -> task
-'''
 
 
 class BaseTask(database.Model):
@@ -102,16 +92,35 @@ def home():
 @app.route('/add-task', methods=['POST'])
 def add_task():
     form_data = request.get_json()
-
     name = form_data.get('listName')
 
-    # new database way
     new_list = BaseListHeader(name=name)
 
     database.session.add(new_list)
     database.session.commit()
 
     return jsonify({"response": "added list"})
+
+
+@app.route('/edit-task', methods=['POST'])
+def edit_task():
+    data = request.get_json()
+    task_id = data.get("taskId")
+    current_task = database.session.get(BaseTask, task_id)
+
+    current_task.name = data.get("newName")
+    current_task.description = data.get("newDescription")
+    current_task.completed = data.get("newCompletion")
+
+    database.session.commit()
+
+    return jsonify({"response": "task edited"})
+
+
+@app.route('/get-task/<task_id>', methods=['GET'])
+def return_task(task_id):
+    current_task = database.session.get(BaseTask, task_id)
+    return jsonify(current_task.to_dict())
 
 
 @app.route('/get-tasks', methods=['GET'])
@@ -126,8 +135,8 @@ def return_tasks():
 def complete_task():
     data = request.get_json()
     task_id = data.get("taskId")
-
     current_task = database.session.get(BaseTask, task_id)
+
     current_task.completed = True
     database.session.commit()
 
@@ -137,7 +146,6 @@ def complete_task():
 @app.route('/delete-task', methods=['POST'])
 def delete_task():
     data = request.get_json()
-
     user = database.session.get(BaseTask, data.get('taskId'))
     parent_list = database.session.get(BaseListHeader, user.home_list)
 
@@ -154,7 +162,6 @@ def delete_task():
 @app.route('/add-next', methods=['POST'])
 def add_next_task():
     data = request.get_json()
-
     current_list = database.session.get(BaseListHeader, data.get('listId'))
 
     new_name = data.get("newName")
@@ -170,7 +177,6 @@ def add_next_task():
 @app.route('/add-subtask', methods=['POST'])
 def add_subtask():
     data = request.get_json()
-
     current_task = database.session.get(BaseTask, data.get('taskId'))
     new_subtask = BaseSubtask(content=data.get('newName'))
 
@@ -179,10 +185,10 @@ def add_subtask():
 
     return jsonify({'response': 'subtask added'})
 
+
 @app.route('/complete-subtask', methods=['POST'])
 def complete_subtask():
     data = request.get_json()
-
     current_subtask = database.session.get(BaseSubtask, data.get('subtaskId'))
 
     database.session.delete(current_subtask)

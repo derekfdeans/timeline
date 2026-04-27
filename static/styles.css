@@ -59,6 +59,10 @@ body {
     color: var(--text-primary);
 }
 
+.dialog::backdrop {
+    background-color: rgba(0, 0, 0, 0.5);
+}
+
 .dialog-holder {
     display: flex;
     align-items: center;
@@ -112,6 +116,7 @@ body {
     display: grid;
     gap: 10px;
     grid-template-columns: 1fr 1fr;
+    font-size: 0.9em;
 }
 
 .sidebar-list-container {
